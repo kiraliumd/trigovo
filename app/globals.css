@@ -128,11 +128,24 @@
 }
 
 @layer utilities {
-  .w-sidebar {
-    width: 255px !important;
+  :root {
+    --sidebar-width: 255px !important;
   }
 
-  .min-w-sidebar {
+  .w-sidebar {
+    width: 255px !important;
     min-width: 255px !important;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background-color: white;
+  }
+
+  [data-state="expanded"] .group\/sidebar-wrapper,
+  [data-variant="sidebar"] {
+    z-index: 50 !important;
   }
 }
