@@ -7,6 +7,7 @@ export interface BookingDetails {
     departureDate: string // ISO string
     origin: string
     destination: string
+    itinerary_details?: any
 }
 
 const USER_AGENTS = [
@@ -50,200 +51,152 @@ async function scrapeLatam(pnr: string, lastname: string): Promise<BookingDetail
         // 1. Espera Inicial para animação
         await page.waitForTimeout(3000)
 
-        // 2. Lógica de 3 Camadas para Cookies
+        // 2. Lógica de Cookies
         try {
             console.log('Tentando fechar cookies...')
             const cookieBtn = page.getByRole('button', { name: 'Aceite todos os cookies' })
             if (await cookieBtn.isVisible({ timeout: 5000 })) {
                 await cookieBtn.click()
-                console.log('Botão de cookies clicado.')
             }
         } catch (error) {
-            console.log('Clique falhou, tentando remover o banner via JS...')
-            await page.evaluate(() => {
-                const buttons = Array.from(document.querySelectorAll('button'))
-                const targetBtn = buttons.find(b => b.innerText.includes('Aceite todos os cookies'))
-                if (targetBtn) {
-                    targetBtn.closest('div[role="dialog"]')?.remove() || targetBtn.closest('div')?.remove()
-                }
-            })
+            // Ignora erro de cookie
         }
 
         await page.waitForTimeout(1000)
 
-        // --- DEBUG BLOCK START ---
-        console.log('📸 Tirando screenshot de diagnóstico...');
-        console.log('Page Title:', await page.title()); // Quero saber o título da página
-        // Salva na raiz do projeto para fácil acesso
-        await page.screenshot({ path: 'debug-latam-state.png', fullPage: true });
-
-        // Salva o HTML também para vermos se é bloqueio de bot
-        const htmlContent = await page.content();
-        if (htmlContent.includes('Access Denied') || htmlContent.includes('Access to this page has been denied')) {
-            console.error('⛔ BLOQUEIO DETECTADO: A Latam bloqueou o IP/Bot.');
-            throw new Error('Bot Blocked by WAF');
-        }
-        // --- DEBUG BLOCK END ---
-
-        // 1. Seleção Simplificada (para teste)
+        // 3. Login
         const pnrInput = page.getByLabel(/Número de compra ou código/i).or(page.locator('#confirmationCode'))
-
-        // 2. Garantir Visibilidade
-        console.log('Aguardando input do PNR ficar visível...');
         await pnrInput.waitFor({ state: 'visible', timeout: 10000 });
-
-        // 3. Interação
         await pnrInput.click();
-        await pnrInput.pressSequentially(pnr, { delay: 150 });
-
-        await page.waitForTimeout(500)
+        await pnrInput.pressSequentially(pnr, { delay: 100 });
 
         const lastnameInput = page.getByLabel(/Sobrenome do passageiro/i)
         await lastnameInput.click()
         await lastnameInput.pressSequentially(lastname, { delay: 100 })
 
-        await page.waitForTimeout(500)
-
+        console.log('Dados preenchidos. Clicando em Procurar...');
         await page.getByRole('button', { name: 'Procurar' }).click()
 
         await page.waitForTimeout(5000)
-
-        // Scroll Obrigatório
-        await page.mouse.wheel(0, 1000)
+        await page.mouse.wheel(0, 1000) // Scroll para garantir que elementos carreguem
         await page.waitForTimeout(2000)
 
-        // 4. Anti-Noise Text Parsing Strategy
-        const fullText = await page.evaluate(() => document.body.innerText);
+        // --- NOVA ESTRATÉGIA: CLIQUE E INTERCEPTAÇÃO NA NOVA ABA ---
 
-        // CORTE DE SEGURANÇA: Jogar fora tudo antes de "Itinerário"
-        const splitKeyword = 'Itinerário';
-        const itineraryIndex = fullText.indexOf(splitKeyword);
+        // 1. Localizar e Clicar no Botão (Estratégia Robusta)
+        console.log('Procurando botão de Cartão de Embarque...')
+        const boardingPassBtn = page.locator('button, a')
+            .filter({ hasText: /Cartão de embarque|Boarding Pass/i })
+            .first();
 
-        if (itineraryIndex === -1) {
-            console.warn('Palavra-chave "Itinerário" não encontrada. Tentando extração bruta...');
-        }
+        await boardingPassBtn.waitFor({ state: 'visible', timeout: 15000 });
+        console.log('Botão encontrado!');
 
-        // Trabalhamos apenas daqui para baixo se encontrou, senão usa tudo (fallback)
-        const cleanText = itineraryIndex !== -1 ? fullText.substring(itineraryIndex) : fullText;
-        console.log('DEBUG TEXTO LIMPO:', cleanText.substring(0, 300));
+        // 2. Preparar para a Nova Aba (Popup)
+        const popupPromise = context.waitForEvent('page');
 
-        // Mapeamento de meses PT-BR
-        const monthMap: { [key: string]: string } = {
-            'janeiro': '01', 'fevereiro': '02', 'março': '03', 'abril': '04',
-            'maio': '05', 'junho': '06', 'julho': '07', 'agosto': '08',
-            'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12'
-        };
+        // Clique forçado para garantir
+        await boardingPassBtn.click({ force: true });
 
-        // Extração da DATA
-        let departureDate = null;
-        const dateRegex = /(\d{1,2})\s+de\s+([a-zç]+)\s+de\s+(\d{4})/i;
-        const dateMatch = cleanText.match(dateRegex);
+        // 3. Capturar a Nova Aba
+        const newPage = await popupPromise;
+        await newPage.waitForLoadState('domcontentloaded');
+        console.log('Nova aba aberta. Título:', await newPage.title());
 
-        if (dateMatch) {
-            const day = dateMatch[1].padStart(2, '0');
-            const monthName = dateMatch[2].toLowerCase();
-            const year = dateMatch[3];
-            const month = monthMap[monthName];
+        // 4. Interceptar o JSON na NOVA ABA
+        console.log('Aguardando JSON de detalhes na nova aba...');
 
-            if (month) {
-                departureDate = `${year}-${month}-${day}T12:00:00.000Z`; // Noon to be safe
-            }
-        }
+        // O endpoint pode variar, vamos monitorar padrões comuns
+        const response = await newPage.waitForResponse(
+            (res) => {
+                const url = res.url();
+                const method = res.request().method();
+                const status = res.status();
+                const contentType = res.headers()['content-type'] || '';
 
-        // Fallback se falhar a data: usar data de amanhã para não quebrar o banco
-        if (!departureDate) {
-            console.error('Data não encontrada no padrão esperado.');
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            departureDate = tomorrow.toISOString();
-        }
-
-        // Extração do NÚMERO DO VOO
-        const flightRegex = /(LA\s?\d{3,4})/i;
-        const flightMatch = cleanText.match(flightRegex);
-        const flightNumber = flightMatch ? flightMatch[1].replace(/\s/g, '') : 'PENDENTE';
-
-        // Extração da ROTA (Origem e Destino)
-        // Buscar APENAS códigos entre parênteses (XXX)
-        const iataRegex = /\(([A-Z]{3})\)/g;
-        const matches = [...cleanText.matchAll(iataRegex)];
-        const iataCodes = matches.map(m => m[1]);
-
-        // Filtra códigos inválidos comuns
-        const validIatas = iataCodes.filter(code => code !== 'BRL' && code !== 'USD');
-
-        let origin = '---';
-        let destination = '---';
-
-        if (validIatas.length >= 2) {
-            origin = validIatas[0];
-            destination = validIatas[validIatas.length - 1];
-        }
-
-        // --- NOVA LÓGICA DE SEGMENTOS ---
-        const segments: any[] = [];
-        // Regex para capturar horários (HH:mm) e aeroportos (XXX) próximos
-        // Exemplo simplificado: "10:00 (GRU) ... 14:00 (MIA)"
-        // Vamos tentar capturar blocos de texto que pareçam voos
-
-        // Estratégia: Dividir o texto em linhas e procurar padrões de voo
-        const lines = cleanText.split('\n');
-        let currentSegment: any = {};
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-
-            // Procura por voo (LA XXXX)
-            const flightMatch = line.match(/(LA\s?\d{3,4})/i);
-            if (flightMatch) {
-                if (currentSegment.flight) {
-                    segments.push(currentSegment);
-                    currentSegment = {};
+                // Debug para ver o que está passando
+                if (url.includes('boarding-pass') || url.includes('record') || url.includes('trip')) {
+                    console.log(`Detectado: ${method} ${status} ${url} [${contentType}]`);
                 }
-                currentSegment.flight = flightMatch[1].replace(/\s/g, '');
-            }
 
-            // Procura por horário e aeroporto: 10:00 (GRU)
-            const timeAirportMatch = line.match(/(\d{2}:\d{2})\s*\(?([A-Z]{3})\)?/);
-            if (timeAirportMatch) {
-                if (!currentSegment.departure) {
-                    currentSegment.departure = {
-                        time: timeAirportMatch[1],
-                        airport: timeAirportMatch[2]
-                    };
-                } else if (!currentSegment.arrival) {
-                    currentSegment.arrival = {
-                        time: timeAirportMatch[1],
-                        airport: timeAirportMatch[2]
-                    };
-                }
-            }
-        }
-        // Push last segment if valid
-        if (currentSegment.flight && currentSegment.departure) {
-            segments.push(currentSegment);
+                return (
+                    status === 200 &&
+                    method === 'GET' && // Ignora OPTIONS
+                    contentType.includes('application/json') && // Garante que é JSON
+                    (url.includes('boarding-pass') || url.includes('record') || url.includes('trip'))
+                );
+            },
+            { timeout: 30000 }
+        );
+
+        await newPage.waitForTimeout(1000); // Respira 1s para garantir o download do corpo
+        const data = await response.json();
+        console.log('JSON lido com sucesso. Tamanho:', JSON.stringify(data).length);
+        // console.log('JSON Preview:', JSON.stringify(data).substring(0, 200));
+
+        // 5. Processamento dos Dados
+        // Ajuste conforme a estrutura real retornada. O usuário sugeriu itineraryParts e passengers.
+        const itineraryParts = data.itineraryParts || data.trip?.itineraryParts || [];
+        const passengers = data.passengers || data.trip?.passengers || [];
+        const boardingPasses = data.boardingPasses || [];
+
+        if (!itineraryParts || itineraryParts.length === 0) {
+            // Tenta fallback para estrutura 'record' se for diferente
+            throw new Error('Estrutura de itinerário não encontrada no JSON capturado.');
         }
 
-        // Se a lógica acima falhar, cria um segmento padrão com os dados gerais
-        if (segments.length === 0) {
-            segments.push({
-                flight: flightNumber,
-                departure: { time: '12:00', airport: origin },
-                arrival: { time: '16:00', airport: destination }
-            });
-        }
+        // Pega os segmentos do primeiro itinerário (geralmente Ida)
+        // Se houver volta, estaria em itineraryParts[1]
+        // Vamos pegar TODOS os segmentos de TODAS as partes
+        const allSegments: any[] = [];
+        itineraryParts.forEach((part: any) => {
+            if (part.segments) {
+                allSegments.push(...part.segments);
+            }
+        });
+
+        const flightSegments = allSegments.map((seg: any) => ({
+            flightNumber: `${seg.airlineCode}${seg.flightNumber}`,
+            origin: seg.departure?.airport?.airportCode || '---',
+            destination: seg.arrival?.airport?.airportCode || '---',
+            date: seg.departure?.dateTime?.isoValue,
+            arrivalDate: seg.arrival?.dateTime?.isoValue,
+            duration: seg.duration || seg.deltaTime // Tenta ambos
+        }));
+
+        // Cruzamento de Passageiros com Assentos
+        const passengerList = passengers.map((p: any) => {
+            const bp = boardingPasses.find((b: any) => b.passengerId === p.id || b.passengerId === p.passengerId);
+            return {
+                name: `${p.firstName} ${p.lastName}`.toUpperCase(),
+                seat: bp?.seatNumber || "Não marcado",
+                group: bp?.boardingGroup || "C"
+            };
+        });
+
+        // 6. Fechar abas e Retornar
+        await newPage.close();
 
         return {
-            flightNumber,
-            departureDate,
-            origin,
-            destination,
-            itinerary_details: segments
-        }
+            flightNumber: flightSegments[0].flightNumber,
+            origin: flightSegments[0].origin,
+            destination: flightSegments[flightSegments.length - 1].destination,
+            departureDate: flightSegments[0].date, // Mapeado para departureDate na interface
+            itinerary_details: {
+                segments: flightSegments,
+                passengers: passengerList,
+                source: 'NEW_TAB_API'
+            }
+        };
 
     } catch (error) {
         console.error(`Scraping failed for LATAM ${pnr}:`, error)
-        await page.screenshot({ path: 'error-latam-input.png', fullPage: true });
+        // Screenshot da página original
+        await page.screenshot({ path: 'debug-fail-main.png', fullPage: true });
+
+        // Tenta screenshot da nova aba se ela existir no contexto (difícil acessar aqui se newPage não foi definida no escopo superior)
+        // Mas o erro geralmente ocorre antes ou durante.
+
         throw new Error(`Failed to fetch booking details: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
         await browser.close()

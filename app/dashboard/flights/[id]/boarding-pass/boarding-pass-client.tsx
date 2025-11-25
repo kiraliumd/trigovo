@@ -32,6 +32,24 @@ export function BoardingPassClient({
         documentTitle: `BoardingPass-${ticket.pnr}`,
     })
 
+    // Parse Itinerary Details
+    const details = ticket.itinerary_details as any || {}
+
+    // Fallback if no rich data
+    const passengers = details.passengers || [{
+        name: `${ticket.passenger_name} ${ticket.passenger_lastname}`,
+        seat: ticket.seat || "---",
+        group: ticket.group || "C"
+    }]
+
+    const segments = details.segments || [{
+        flightNumber: flight.flight_number,
+        origin: flight.origin,
+        destination: flight.destination,
+        date: flight.departure_date,
+        arrivalDate: null // Will calculate fallback in layout
+    }]
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-100px)]">
             {/* Controls Section */}
@@ -88,15 +106,19 @@ export function BoardingPassClient({
             </Card>
 
             {/* Preview Section */}
-            <div className="lg:col-span-2 bg-gray-100 rounded-xl border border-gray-200 p-8 flex items-center justify-center overflow-auto">
-                <div className="scale-75 lg:scale-90 xl:scale-100 transition-transform origin-center">
-                    <div ref={componentRef}>
-                        <TicketLayout
-                            ticket={ticket}
-                            flight={flight}
-                            agency={agency}
-                            options={{ hasHandBag, hasCheckedBag, showAgencyLogo }}
-                        />
+            <div className="lg:col-span-2 bg-gray-100 rounded-xl border border-gray-200 p-8 flex items-start justify-center overflow-auto">
+                <div className="scale-75 lg:scale-90 xl:scale-100 transition-transform origin-top">
+                    <div ref={componentRef} className="space-y-8 p-4 bg-gray-100 print:bg-white print:p-0">
+                        {passengers.map((passenger: any, index: number) => (
+                            <div key={index} className="print:break-after-page">
+                                <TicketLayout
+                                    passenger={passenger}
+                                    segments={segments}
+                                    agency={agency}
+                                    options={{ hasHandBag, hasCheckedBag, showAgencyLogo }}
+                                />
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
