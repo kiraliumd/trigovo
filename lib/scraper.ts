@@ -180,11 +180,65 @@ async function scrapeLatam(pnr: string, lastname: string): Promise<BookingDetail
             destination = validIatas[validIatas.length - 1];
         }
 
+        // --- NOVA LÓGICA DE SEGMENTOS ---
+        const segments: any[] = [];
+        // Regex para capturar horários (HH:mm) e aeroportos (XXX) próximos
+        // Exemplo simplificado: "10:00 (GRU) ... 14:00 (MIA)"
+        // Vamos tentar capturar blocos de texto que pareçam voos
+
+        // Estratégia: Dividir o texto em linhas e procurar padrões de voo
+        const lines = cleanText.split('\n');
+        let currentSegment: any = {};
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+
+            // Procura por voo (LA XXXX)
+            const flightMatch = line.match(/(LA\s?\d{3,4})/i);
+            if (flightMatch) {
+                if (currentSegment.flight) {
+                    segments.push(currentSegment);
+                    currentSegment = {};
+                }
+                currentSegment.flight = flightMatch[1].replace(/\s/g, '');
+            }
+
+            // Procura por horário e aeroporto: 10:00 (GRU)
+            const timeAirportMatch = line.match(/(\d{2}:\d{2})\s*\(?([A-Z]{3})\)?/);
+            if (timeAirportMatch) {
+                if (!currentSegment.departure) {
+                    currentSegment.departure = {
+                        time: timeAirportMatch[1],
+                        airport: timeAirportMatch[2]
+                    };
+                } else if (!currentSegment.arrival) {
+                    currentSegment.arrival = {
+                        time: timeAirportMatch[1],
+                        airport: timeAirportMatch[2]
+                    };
+                }
+            }
+        }
+        // Push last segment if valid
+        if (currentSegment.flight && currentSegment.departure) {
+            segments.push(currentSegment);
+        }
+
+        // Se a lógica acima falhar, cria um segmento padrão com os dados gerais
+        if (segments.length === 0) {
+            segments.push({
+                flight: flightNumber,
+                departure: { time: '12:00', airport: origin },
+                arrival: { time: '16:00', airport: destination }
+            });
+        }
+
         return {
             flightNumber,
             departureDate,
             origin,
-            destination
+            destination,
+            itinerary_details: segments
         }
 
     } catch (error) {

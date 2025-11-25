@@ -85,7 +85,8 @@ export async function fetchBookingDetails(pnr: string, lastname: string, airline
                 origin: bookingDetails.origin,
                 destination: bookingDetails.destination,
                 status: 'Confirmado',
-                checkin_status: 'Fechado'
+                checkin_status: 'Fechado',
+                itinerary_details: bookingDetails.itinerary_details
             })
 
         if (dbError) throw dbError

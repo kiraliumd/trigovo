@@ -16,14 +16,16 @@ async function migrate() {
 
     const client = new Client({
         connectionString: connectionString,
-        ssl: { rejectUnauthorized: false } // Required for Supabase/Neon usually
+        ssl: {
+            rejectUnauthorized: false
+        }
     });
 
     try {
         await client.connect();
         console.log('✅ Connected to database');
 
-        const migrationFile = path.join(process.cwd(), 'supabase/migrations/20251124013000_add_onboarding_columns.sql');
+        const migrationFile = path.join(process.cwd(), 'supabase/migrations/20251124213000_add_itinerary_details.sql');
         const sql = fs.readFileSync(migrationFile, 'utf8');
 
         console.log(`🚀 Executing migration: ${path.basename(migrationFile)}`);

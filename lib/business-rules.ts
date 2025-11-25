@@ -38,3 +38,16 @@ export function calculateCheckinStatus(airline: Airline, flightDate: Date): Chec
         };
     }
 }
+
+export function getCheckinUrl(airline: string, pnr: string, lastName: string) {
+    switch (airline) {
+        case 'LATAM':
+            return `https://www.latamairlines.com/br/pt/checkin?orderId=${pnr}&lastName=${lastName}`
+        case 'GOL':
+            return 'https://b2c.voegol.com.br/check-in/'
+        case 'AZUL':
+            return 'https://www.voeazul.com.br/check-in'
+        default:
+            return '#'
+    }
+}
