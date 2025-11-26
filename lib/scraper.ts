@@ -29,7 +29,7 @@ export async function scrapeBooking(pnr: string, lastname: string, airline: Airl
         case 'GOL':
             return await scrapeGol(pnr, lastname, origin)
         case 'AZUL':
-            return await scrapeAzul(pnr, lastname)
+            return await scrapeAzul(pnr, lastname, origin)
         default:
             throw new Error(`Airline ${airline} not supported`)
     }
@@ -242,7 +242,7 @@ async function scrapeLatam(pnr: string, lastname: string): Promise<BookingDetail
 async function scrapeGol(pnr: string, lastname: string, origin?: string): Promise<BookingDetails> {
     const browser = await chromium.launch({
         headless: false,
-        slowMo: 200,
+        slowMo: 100, // Reduzido para não ser TÃO lento, mas ainda humano
         args: [
             '--disable-blink-features=AutomationControlled',
             '--start-maximized',
@@ -252,19 +252,55 @@ async function scrapeGol(pnr: string, lastname: string, origin?: string): Promis
             '--window-position=0,0',
             '--ignore-certificate-errors',
             '--ignore-certificate-errors-spki-list',
-            '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            '--disable-accelerated-2d-canvas',
+            '--disable-gpu',
+            '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
         ]
     })
 
     const context = await browser.newContext({
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         viewport: { width: 1366, height: 768 },
-        locale: 'pt-BR'
+        locale: 'pt-BR',
+        timezoneId: 'America/Sao_Paulo',
+        deviceScaleFactor: 1,
+        hasTouch: false,
+        isMobile: false,
+        permissions: ['geolocation', 'notifications']
     })
 
-    // STEALTH MODE
+    // --- SUPER STEALTH INJECTION ---
     await context.addInitScript(() => {
+        // 1. Overwrite webdriver
         Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+
+        // 2. Mock Chrome object
+        // @ts-ignore
+        window.chrome = {
+            runtime: {},
+            loadTimes: function () { },
+            csi: function () { },
+            app: {}
+        };
+
+        // 3. Mock Permissions
+        const originalQuery = window.navigator.permissions.query;
+        // @ts-ignore
+        window.navigator.permissions.query = (parameters) => (
+            parameters.name === 'notifications' ?
+                Promise.resolve({ state: Notification.permission }) :
+                originalQuery(parameters)
+        );
+
+        // 4. Mock Plugins (Fake length)
+        Object.defineProperty(navigator, 'plugins', {
+            get: () => [1, 2, 3, 4, 5],
+        });
+
+        // 5. Mock Languages
+        Object.defineProperty(navigator, 'languages', {
+            get: () => ['pt-BR', 'pt', 'en-US', 'en'],
+        });
     });
 
     const page = await context.newPage()
@@ -280,13 +316,13 @@ async function scrapeGol(pnr: string, lastname: string, origin?: string): Promis
     try {
         console.log(`Starting scrape for GOL - PNR: ${pnr}`)
 
-        // 1. Navegação Blindada (Restored)
+        // 1. Navegação Blindada
         await page.goto('https://b2c.voegol.com.br/minhas-viagens/encontrar-viagem', {
-            waitUntil: 'commit', // Não espera assets pesados
+            waitUntil: 'commit',
             timeout: 60000
         });
 
-        // Espera explícita por QUALQUER input para confirmar carregamento
+        // Espera explícita por QUALQUER input
         try {
             console.log('Aguardando inputs carregarem...');
             await page.waitForSelector('input', { timeout: 45000 });
@@ -296,19 +332,30 @@ async function scrapeGol(pnr: string, lastname: string, origin?: string): Promis
             throw new Error('Site da GOL demorou demais para responder.');
         }
 
-        // Interação Humana (Mouse & Teclado)
-        await page.mouse.move(100, 100);
-        await page.mouse.down();
-        await page.mouse.up();
-        await page.waitForTimeout(1000);
+        // 2. COOKIE BANNER (Importante para parecer humano)
+        try {
+            const cookieBtn = page.getByRole('button', { name: /aceitar|concordo|fechar/i }).first();
+            if (await cookieBtn.isVisible({ timeout: 5000 })) {
+                console.log('Aceitando cookies...');
+                await cookieBtn.click();
+                await page.waitForTimeout(1000);
+            }
+        } catch (e) {
+            // Ignora se não tiver banner
+        }
+
+        // Interação Humana (Mouse Jitter)
+        await page.mouse.move(Math.random() * 500, Math.random() * 500);
+        await page.waitForTimeout(500);
 
         console.log('Tentando localizar inputs visualmente...');
 
-        // 2. Preenchimento dos Campos (Restored Robust Selectors)
+        // 3. Preenchimento dos Campos
         // PNR
         const pnrInput = page.getByPlaceholder(/código|reserva/i).or(page.locator('input[type="text"]').nth(0));
         await pnrInput.waitFor({ state: 'visible', timeout: 30000 });
         await pnrInput.click({ force: true });
+        await page.waitForTimeout(300); // Delay humano
         await pnrInput.fill(pnr);
 
         // ORIGEM
@@ -320,9 +367,9 @@ async function scrapeGol(pnr: string, lastname: string, origin?: string): Promis
             await originInput.clear();
             await page.waitForTimeout(500);
 
-            await originInput.pressSequentially(origin, { delay: 300 });
+            await originInput.pressSequentially(origin, { delay: 200 + Math.random() * 100 }); // Digitação variável
             console.log('Aguardando dropdown de sugestões...');
-            await page.waitForTimeout(2000);
+            await page.waitForTimeout(2500);
 
             // Estratégia Híbrida de Seleção
             try {
@@ -351,9 +398,10 @@ async function scrapeGol(pnr: string, lastname: string, origin?: string): Promis
         console.log('Preenchendo sobrenome...');
         const lastnameInput = page.getByPlaceholder(/sobrenome/i).or(page.locator('input[type="text"]').nth(origin ? 2 : 1));
         await lastnameInput.click({ force: true });
+        await page.waitForTimeout(300);
         await lastnameInput.fill(lastname);
 
-        // 3. ESTRATÉGIA DE SUBMISSÃO PERSISTENTE
+        // 4. ESTRATÉGIA DE SUBMISSÃO (Mouse Real)
         console.log('Preparando para buscar...');
 
         const submitBtn = page.locator('button[type="submit"], button')
@@ -368,16 +416,21 @@ async function scrapeGol(pnr: string, lastname: string, origin?: string): Promis
             await submitBtn.elementHandle()
         ).catch(() => console.log('Aviso: Timeout esperando botão habilitar, tentando clicar mesmo assim...'));
 
-        // TENTATIVA 1: Clique Normal
-        console.log('Tentativa 1: Clique...');
-        await submitBtn.hover();
-        await page.waitForTimeout(500);
-        await submitBtn.click({ force: true });
+        // Move o mouse suavemente até o botão
+        const box = await submitBtn.boundingBox();
+        if (box) {
+            await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 10 });
+            await page.waitForTimeout(200);
+            await page.mouse.down();
+            await page.waitForTimeout(100);
+            await page.mouse.up();
+        } else {
+            await submitBtn.click({ force: true });
+        }
 
-        // TENTATIVA 2: Enter (Se não navegar em 3s)
+        // Fallback: Enter
         try {
-            await page.waitForTimeout(3000); // Espera um pouco
-            // Verifica se ainda estamos na mesma URL
+            await page.waitForTimeout(3000);
             if (page.url().includes('encontrar-viagem')) {
                 console.log('Tentativa 2: Pressionando ENTER...');
                 const inputToFocus = page.getByPlaceholder(/sobrenome/i).or(page.locator('input[type="text"]').nth(origin ? 2 : 1));
@@ -386,7 +439,7 @@ async function scrapeGol(pnr: string, lastname: string, origin?: string): Promis
             }
         } catch (e) { }
 
-        // 4. Captura do JSON
+        // 5. Captura do JSON
         console.log('Aguardando dados da GOL...');
         const response = await apiPromise;
 
@@ -440,7 +493,158 @@ async function scrapeGol(pnr: string, lastname: string, origin?: string): Promis
     }
 }
 
-async function scrapeAzul(pnr: string, lastname: string): Promise<BookingDetails> {
-    console.log('TODO: Implementar scraper da AZUL');
-    throw new Error('Integração AZUL em desenvolvimento');
+// --- SCRAPER AZUL (Via Interceptação de JSON) ---
+async function scrapeAzul(pnr: string, lastname: string, origin?: string): Promise<BookingDetails> {
+    if (!origin) throw new Error('Para buscar na Azul, é obrigatório informar o Aeroporto de Origem (ex: VCP).');
+
+    const browser = await chromium.launch({
+        headless: false,
+        slowMo: 200,
+        args: ['--disable-blink-features=AutomationControlled', '--start-maximized']
+    })
+
+    const context = await browser.newContext({
+        userAgent: getRandomUserAgent(),
+        viewport: { width: 1366, height: 768 },
+        locale: 'pt-BR'
+    })
+
+    // Stealth básico
+    await context.addInitScript(() => {
+        Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+    });
+
+    const page = await context.newPage()
+
+    try {
+        console.log(`Starting scrape for AZUL - PNR: ${pnr} / Origin: ${origin}`)
+
+        // 1. Listener de API Inteligente (Content-Based)
+        // Em vez de adivinhar a URL, vamos inspecionar o CONTEÚDO do JSON.
+        // Procuramos por { data: { journeys: [...] } }
+        const apiPromise = page.waitForResponse(async res => {
+            // Filtros básicos de performance
+            if (res.status() !== 200) return false;
+            const contentType = res.headers()['content-type'] || '';
+            if (!contentType.includes('application/json')) return false;
+
+            const url = res.url();
+            // Ignora assets, analytics, etc.
+            if (!url.includes('voeazul.com.br') && !url.includes('azul')) return false;
+
+            try {
+                // Clone o response para não consumir o stream se não for o que queremos (embora no Playwright isso seja tratado)
+                const body = await res.json();
+
+                // Debug: Logar URLs de APIs encontradas
+                // console.log(`[AZUL DEBUG] JSON em ${url}: keys=${Object.keys(body)}`);
+
+                // Verificação da Estrutura
+                if (body?.data?.journeys || body?.journeys) {
+                    console.log(`[MATCH] JSON de reserva encontrado na URL: ${url}`);
+                    return true;
+                }
+            } catch (e) {
+                // Ignora erros de parse (ex: json inválido)
+            }
+            return false;
+        }, { timeout: 60000 });
+
+        // 2. Navegação Direta (URL Mágica)
+        // A Azul permite deeplink com PNR e Origem
+        const directUrl = `https://www.voeazul.com.br/br/pt/home/minhas-viagens?pnr=${pnr}&origin=${origin}`;
+        await page.goto(directUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+        // Se a URL direta não disparar a API imediatamente, espera um pouco ou tenta clicar em algo
+        // Geralmente o site carrega sozinho com os parâmetros na URL
+
+        // 3. Captura e Parse
+        console.log('Aguardando JSON da Azul...');
+        const response = await apiPromise;
+        const json = await response.json();
+
+        // Normaliza a estrutura (pode vir em json.data ou direto na raiz)
+        const data = json.data?.journeys ? json.data : (json.journeys ? json : null);
+
+        if (!data || !data.journeys) throw new Error('JSON da Azul inválido ou reserva não encontrada.');
+
+        // --- PARSE DOS DADOS (Estrutura Azul) ---
+        // A. Viagens (Trips - Ida/Volta)
+        // Na Azul, cada item em 'journeys' é uma perna (Ida ou Volta)
+        const trips = data.journeys.map((journey: any, index: number) => {
+            const segments = journey.segments.map((seg: any) => {
+                const info = seg.identifier;
+                // Calcula duração em horas/min
+                const start = new Date(info.std).getTime();
+                const end = new Date(info.sta).getTime();
+                const diffMins = Math.floor((end - start) / 60000);
+                const hours = Math.floor(diffMins / 60);
+                const minutes = diffMins % 60;
+
+                return {
+                    flightNumber: `${info.carrierCode}${info.flightNumber}`, // Ex: AD4017
+                    origin: info.departureStation,
+                    destination: info.arrivalStation,
+                    date: info.std, // ISO (2025-11-27T15:35:00)
+                    arrivalDate: info.sta,
+                    duration: `${hours} h ${minutes} min`,
+                    airline: 'AZUL'
+                }
+            });
+            return {
+                type: index === 0 ? 'IDA' : 'VOLTA',
+                segments: segments
+            };
+        });
+
+        // B. Passageiros e Assentos
+        // A Azul linka passageiros aos segmentos via 'passengerKey'
+        const passengerList = data.passengers.map((p: any) => {
+            // Tenta achar o assento no primeiro segmento da primeira jornada
+            // A estrutura é complexa: journey -> segments -> passengerSegment -> seat
+            let seat = "Não marcado";
+            try {
+                const firstJourney = data.journeys[0];
+                const firstSegment = firstJourney.segments[0];
+                const paxSeg = firstSegment.passengerSegment.find((ps: any) => ps.passengerKey === p.passengerKey);
+                if (paxSeg && paxSeg.seat && paxSeg.seat.designator) {
+                    seat = paxSeg.seat.designator; // Ex: "19A"
+                }
+            } catch (e) { }
+
+            return {
+                name: `${p.name.first} ${p.name.last}`.toUpperCase(),
+                seat: seat,
+                group: "—",
+                baggage: {
+                    hasPersonalItem: true,
+                    hasCarryOn: true,
+                    hasChecked: p.bagCount > 0
+                }
+            };
+        });
+
+        // C. Dados Flat para o Banco
+        const firstLeg = trips[0].segments[0];
+        const lastTrip = trips[trips.length - 1];
+        const lastLeg = lastTrip.segments[lastTrip.segments.length - 1];
+
+        return {
+            flightNumber: firstLeg.flightNumber,
+            departureDate: firstLeg.date,
+            origin: firstLeg.origin,
+            destination: lastLeg.destination, // Destino final da viagem
+            itinerary_details: {
+                trips: trips,
+                passengers: passengerList
+            }
+        }
+
+    } catch (error) {
+        console.error(`Azul Scraper Error:`, error)
+        await page.screenshot({ path: 'error-azul-debug.png' })
+        throw new Error('Falha ao processar reserva Azul.')
+    } finally {
+        await browser.close()
+    }
 }

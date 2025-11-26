@@ -50,7 +50,11 @@ export function AddFlightDialog() {
         setLoading(true)
 
         try {
-            await fetchBookingDetails(pnr, lastName, airline as any, origin)
+            // Para AZUL, o sobrenome é opcional no form, mas a função espera uma string.
+            // Enviamos um valor padrão se estiver vazio.
+            const finalLastName = (airline === 'AZUL' && !lastName) ? 'AZUL-PASSENGER' : lastName;
+
+            await fetchBookingDetails(pnr, finalLastName, airline as any, origin)
 
             toast.success('Voo adicionado com sucesso!')
             setOpen(false)
@@ -138,7 +142,7 @@ export function AddFlightDialog() {
                             </Button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="pnr">Código PNR</Label>
                                 <Input
@@ -151,34 +155,39 @@ export function AddFlightDialog() {
                                     className="uppercase font-mono"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="lastname">Sobrenome</Label>
-                                <Input
-                                    id="lastname"
-                                    placeholder="ex: SILVA"
-                                    value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
-                                    required
-                                    className="uppercase"
-                                />
-                            </div>
-                        </div>
 
-                        {airline === 'GOL' && (
-                            <div className="space-y-2">
-                                <Label htmlFor="origin">Aeroporto de Origem (Sigla)</Label>
-                                <Input
-                                    id="origin"
-                                    placeholder="Ex: GRU, CGB, GIG"
-                                    value={origin}
-                                    onChange={(e) => setOrigin(e.target.value)}
-                                    required
-                                    maxLength={3}
-                                    className="uppercase font-mono"
-                                />
-                                <p className="text-xs text-muted-foreground">Obrigatório para reservas GOL.</p>
-                            </div>
-                        )}
+                            {airline !== 'AZUL' && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="lastname">Sobrenome</Label>
+                                    <Input
+                                        id="lastname"
+                                        placeholder="ex: SILVA"
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
+                                        required={airline !== 'AZUL'}
+                                        className="uppercase"
+                                    />
+                                </div>
+                            )}
+
+                            {(airline === 'GOL' || airline === 'AZUL') && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="origin">Aeroporto de Origem (Sigla)</Label>
+                                    <Input
+                                        id="origin"
+                                        placeholder="Ex: GRU, CGB, GIG"
+                                        value={origin}
+                                        onChange={(e) => setOrigin(e.target.value)}
+                                        required
+                                        maxLength={3}
+                                        className="uppercase font-mono"
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        Obrigatório para reservas {airline}.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
 
                         <Button type="submit" className="w-full mt-4" disabled={loading}>
                             {loading ? 'Buscando Reserva...' : 'Adicionar Voo'}

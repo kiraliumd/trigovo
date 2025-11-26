@@ -70,16 +70,36 @@ export async function fetchBookingDetails(pnr: string, lastname: string, airline
         }
 
         // 4. Inserção no Banco de Dados (Server-Side)
+
+        // Extrair sobrenome real do passageiro (para corrigir AZUL-PASSENGER)
+        let realPassengerLastname = lastname.toUpperCase();
+
+        if (bookingDetails.itinerary_details?.passengers?.length > 0) {
+            const firstPax = bookingDetails.itinerary_details.passengers[0];
+            if (firstPax.name) {
+                // Tenta extrair o sobrenome do nome completo
+                const parts = firstPax.name.trim().split(' ');
+                if (parts.length > 1) {
+                    realPassengerLastname = parts.pop() || lastname.toUpperCase();
+                }
+            }
+        }
+
+        // Se for AZUL e o lastname for o placeholder, tenta usar o extraído
+        if (airline === 'AZUL' && lastname === 'AZUL-PASSENGER') {
+            // Mantém o realPassengerLastname calculado acima
+        }
+
         const { error: dbError } = await supabase
             .from('tickets')
-            .insert({
-                agency_id: user.id, // ID do usuário autenticado
+            .upsert({
+                agency_id: user.id,
                 pnr: pnr.toUpperCase(),
-                passenger_lastname: lastname.toUpperCase(),
-                passenger_name: 'Passageiro (Editar)',
+                passenger_lastname: realPassengerLastname,
+                // passenger_name: REMOVIDO para não sobrescrever dados manuais da agência
                 airline: airline,
-                flight_id: flightData.id, // Link to Normalized Flight
-                // Legacy Columns (Redundancy for now)
+                flight_id: flightData.id,
+                // Legacy Columns
                 flight_number: bookingDetails.flightNumber,
                 flight_date: bookingDetails.departureDate,
                 origin: bookingDetails.origin,
@@ -87,6 +107,8 @@ export async function fetchBookingDetails(pnr: string, lastname: string, airline
                 status: 'Confirmado',
                 checkin_status: 'Fechado',
                 itinerary_details: bookingDetails.itinerary_details
+            }, {
+                onConflict: 'pnr, agency_id'
             })
 
         if (dbError) throw dbError
