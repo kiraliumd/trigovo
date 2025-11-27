@@ -22,7 +22,37 @@ function getRandomUserAgent() {
     return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]
 }
 
+const SCRAPER_SERVICE_URL = process.env.SCRAPER_SERVICE_URL || 'https://scraper-voos-905122424233.southamerica-east1.run.app/scrape';
+
 export async function scrapeBooking(pnr: string, lastname: string, airline: Airline, origin?: string): Promise<BookingDetails> {
+    // Se estivermos em produção ou forçado via ENV, usa o Cloud Run
+    const useCloud = process.env.NODE_ENV === 'production' || process.env.USE_CLOUD_SCRAPER === 'true';
+
+    if (useCloud) {
+        console.log(`📡 Delegando scraping para Cloud Run: ${airline} ${pnr}`);
+        try {
+            const response = await fetch(SCRAPER_SERVICE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pnr, lastname, airline, origin }),
+                cache: 'no-store' // Importante para não cachear erro
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Erro no Cloud Scraper (${response.status}): ${errorText}`);
+            }
+
+            const data = await response.json();
+            return data as BookingDetails;
+        } catch (error) {
+            console.error('Falha na comunicação com Scraper Service:', error);
+            throw error; // Repassa o erro para a UI tratar
+        }
+    }
+
+    // --- MODO LOCAL (Mantém o código atual abaixo como fallback) ---
+    console.log('🔧 Executando scraper localmente...');
     switch (airline) {
         case 'LATAM':
             return await scrapeLatam(pnr, lastname)
@@ -70,18 +100,67 @@ export async function scrapeBooking(pnr: string, lastname: string, airline: Airl
 
 // Let's apply the changes.
 
+// Helper para Proxy
+function getProxyConfig() {
+    if (process.env.PROXY_SERVER) {
+        return {
+            server: process.env.PROXY_SERVER,
+            username: process.env.PROXY_USERNAME,
+            password: process.env.PROXY_PASSWORD
+        }
+    }
+    return undefined
+}
+
+// Helper para lançar Browser com Proxy (Webshare)
+async function launchBrowser() {
+    const proxyConfig = {
+        server: 'http://p.webshare.io:80',
+        username: 'xtweuspr-country-BR', // Força IP Brasileiro
+        password: '5so72ui3knmj'
+    };
+
+    console.log('🔌 Iniciando Browser com Proxy BR...');
+    return await chromium.launch({
+        headless: false, // Mantenha false para ver o robô trabalhando
+        proxy: proxyConfig,
+        args: [
+            '--disable-blink-features=AutomationControlled',
+            '--no-sandbox',
+            '--disable-setuid-sandbox'
+        ]
+    });
+}
+
 async function scrapeLatam(pnr: string, lastname: string): Promise<BookingDetails> {
-    const browser = await chromium.launch({ headless: false })
+    // Usa o novo helper com proxy
+    const browser = await launchBrowser();
+
     const context = await browser.newContext({
         userAgent: getRandomUserAgent(),
-        viewport: { width: 1280, height: 720 }
+        viewport: { width: 1280, height: 720 },
+        locale: 'pt-BR' // Reforça que somos BR
     })
     const page = await context.newPage()
 
     try {
+        console.log('Verificando IP do Proxy...');
+        await page.goto('https://api.ipify.org?format=json');
+        const content = await page.content();
+        console.log('IP Atual:', content); // Deve mostrar um IP diferente do seu
+    } catch (e) {
+        console.log('Pulo verificação de IP');
+    }
+
+    try {
         console.log(`Starting scrape for LATAM - PNR: ${pnr}`)
 
-        await page.goto('https://www.latamairlines.com/br/pt/minhas-viagens', { waitUntil: 'domcontentloaded' })
+        try {
+            await page.goto('https://www.latamairlines.com/br/pt/minhas-viagens', { waitUntil: 'domcontentloaded', timeout: 60000 })
+        } catch (e) {
+            console.error('Erro de conexão inicial (Proxy?):', e)
+            throw new Error('Falha na conexão inicial com o site da LATAM. Verifique o Proxy.')
+        }
 
         // 1. Espera Inicial para animação
         await page.waitForTimeout(3000)
@@ -241,8 +320,9 @@ async function scrapeLatam(pnr: string, lastname: string): Promise<BookingDetail
 // --- SCRAPER GOL (Via Interceptação de JSON) ---
 async function scrapeGol(pnr: string, lastname: string, origin?: string): Promise<BookingDetails> {
     const browser = await chromium.launch({
-        headless: false,
+        headless: true, // Cloud Run exige headless true
         slowMo: 100, // Reduzido para não ser TÃO lento, mas ainda humano
+        proxy: getProxyConfig(),
         args: [
             '--disable-blink-features=AutomationControlled',
             '--start-maximized',
@@ -317,10 +397,15 @@ async function scrapeGol(pnr: string, lastname: string, origin?: string): Promis
         console.log(`Starting scrape for GOL - PNR: ${pnr}`)
 
         // 1. Navegação Blindada
-        await page.goto('https://b2c.voegol.com.br/minhas-viagens/encontrar-viagem', {
-            waitUntil: 'commit',
-            timeout: 60000
-        });
+        try {
+            await page.goto('https://b2c.voegol.com.br/minhas-viagens/encontrar-viagem', {
+                waitUntil: 'commit',
+                timeout: 60000
+            });
+        } catch (e) {
+            console.error('Erro de conexão inicial GOL (Proxy?):', e)
+            throw new Error('Falha na conexão inicial com o site da GOL. Verifique o Proxy.')
+        }
 
         // Espera explícita por QUALQUER input
         try {
@@ -498,8 +583,9 @@ async function scrapeAzul(pnr: string, lastname: string, origin?: string): Promi
     if (!origin) throw new Error('Para buscar na Azul, é obrigatório informar o Aeroporto de Origem (ex: VCP).');
 
     const browser = await chromium.launch({
-        headless: false,
+        headless: true, // Cloud Run exige headless true
         slowMo: 200,
+        proxy: getProxyConfig(),
         args: ['--disable-blink-features=AutomationControlled', '--start-maximized']
     })
 
@@ -553,7 +639,13 @@ async function scrapeAzul(pnr: string, lastname: string, origin?: string): Promi
         // 2. Navegação Direta (URL Mágica)
         // A Azul permite deeplink com PNR e Origem
         const directUrl = `https://www.voeazul.com.br/br/pt/home/minhas-viagens?pnr=${pnr}&origin=${origin}`;
-        await page.goto(directUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+        try {
+            await page.goto(directUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        } catch (e) {
+            console.error('Erro de conexão inicial AZUL (Proxy?):', e)
+            throw new Error('Falha na conexão inicial com o site da AZUL. Verifique o Proxy.')
+        }
 
         // Se a URL direta não disparar a API imediatamente, espera um pouco ou tenta clicar em algo
         // Geralmente o site carrega sozinho com os parâmetros na URL
