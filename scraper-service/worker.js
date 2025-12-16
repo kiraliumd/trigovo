@@ -1,29 +1,7 @@
 require('dotenv').config();
-const DISABLE_PROXY = process.env.DISABLE_PROXY === 'true';
 const { Worker } = require('bullmq');
-const browserPool = require('./browserPool');
 const scrapers = require('./scraper');
 const { connection, setCachedResult } = require('./queue');
-
-// ==============================
-// PROXY CONFIG
-// ==============================
-
-const PROXY_SERVER = process.env.PROXY_SERVER || 'http://p.webshare.io:80';
-const PROXY_PASSWORD = process.env.PROXY_PASSWORD || '5so72ui3knmj';
-const TOTAL_PROXIES = Number(process.env.TOTAL_PROXIES || 250);
-
-function getRandomProxy() {
-    const randomIndex = Math.floor(Math.random() * TOTAL_PROXIES) + 1;
-    const username = `xtweuspr-BR-${randomIndex}`;
-    console.log(`🎲 Proxy sorteado: ${username}`);
-
-    return {
-        server: PROXY_SERVER,
-        username,
-        password: PROXY_PASSWORD
-    };
-}
 
 // ==============================
 // WORKER
@@ -32,76 +10,85 @@ function getRandomProxy() {
 let workerInstance = null;
 
 function startWorker() {
-    // 5. Controle de Worker em Produção
     if (process.env.ENABLE_WORKER !== 'true') {
-        console.log('🚫 Worker desabilitado (ENABLE_WORKER != true). Apenas API responderá.');
+        console.log('🚫 Worker desabilitado. Apenas API responderá.');
         return null;
     }
 
     if (workerInstance) return workerInstance;
 
-    console.log('👷 Iniciando Worker no mesmo processo...');
+    console.log('👷 Iniciando Worker (Lógica: Direto -> Fallback Proxy)...');
 
     workerInstance = new Worker(
         'scrape-queue',
         async (job) => {
             const { airline, pnr, lastname, origin } = job.data;
-            console.log(`[Job ${job.id}] Processando ${airline} - ${pnr}`);
+            const logPrefix = `[Job ${job.id} | ${airline} ${pnr}]`;
+
+            console.log(`${logPrefix} 🚀 Iniciando processamento...`);
+
+            // Função auxiliar para chamar o scraper correto
+            const executeScraper = async (useProxy) => {
+                const params = { pnr, lastname, origin, useProxy }; // Passa a flag useProxy
+
+                if (airline === 'GOL') return await scrapers.scrapeGol(params);
+                if (airline === 'LATAM') return await scrapers.scrapeLatam(params);
+                if (airline === 'AZUL') return await scrapers.scrapeAzul(params);
+                throw new Error(`Cia não suportada: ${airline}`);
+            };
+
+            let result = null;
 
             try {
-                const proxyConfig = getRandomProxy();
+                // ---------------------------------------------------------
+                // TENTATIVA 1: CONEXÃO DIRETA (SEM PROXY)
+                // ---------------------------------------------------------
+                console.log(`${logPrefix} 1️⃣ Tentando Conexão DIRETA (Sem Proxy)...`);
+                result = await executeScraper(false); // useProxy = false
+                console.log(`${logPrefix} ✅ Sucesso na conexão direta!`);
 
-                const result = await browserPool.withPage(
-                    async (page) => {
-                        switch (airline) {
-                            case 'GOL':
-                                return await scrapers.scrapeGol(page, pnr, lastname, origin);
-                            case 'LATAM':
-                                return await scrapers.scrapeLatam(page, pnr, lastname);
-                            case 'AZUL':
-                                return await scrapers.scrapeAzul(page, pnr, origin);
-                            default:
-                                throw new Error(`Airline ${airline} não suportada`);
-                        }
-                    },
-                    { proxy: proxyConfig }
-                );
+            } catch (directError) {
+                // ---------------------------------------------------------
+                // FALLBACK: TENTATIVA 2: VIA PROXY RESIDENCIAL
+                // ---------------------------------------------------------
+                console.warn(`${logPrefix} ⚠️ Falha Direta: "${directError.message}". Ativando Proxy...`);
 
-                await setCachedResult(pnr, lastname, airline, result, 300);
+                try {
+                    console.log(`${logPrefix} 2️⃣ Tentando VIA PROXY...`);
+                    result = await executeScraper(true); // useProxy = true
+                    console.log(`${logPrefix} ✅ Sucesso via Proxy!`);
+                } catch (proxyError) {
+                    // ---------------------------------------------------------
+                    // FALHA FINAL
+                    // ---------------------------------------------------------
+                    const errorMsg = `Falha dupla (Direta + Proxy). Último erro: ${proxyError.message}`;
+                    console.error(`${logPrefix} ❌ ${errorMsg}`);
 
-                console.log(`[Job ${job.id}] ✅ Job finalizado com sucesso`);
-                return result;
-
-            } catch (error) {
-                // 3. Encerramento Limpo (Sem Retry)
-                const errorMsg = error.message || 'Erro desconhecido';
-                console.error(`[Job ${job.id}] ❌ Job finalizado com erro definitivo: ${errorMsg}`);
-
-                // Retornar objeto de erro FINAL para evitar retry automático do BullMQ
-                return {
-                    status: 'ERROR',
-                    message: errorMsg,
-                    details: 'Falha definitiva. Sem retry.'
-                };
+                    return {
+                        status: 'ERROR',
+                        message: errorMsg,
+                        details: 'Esgotadas tentativas sem e com proxy.'
+                    };
+                }
             }
+
+            // Se chegou aqui, temos um resultado (de uma das duas tentativas)
+            if (result && result.flightNumber) {
+                await setCachedResult(pnr, lastname, airline, result, 300);
+            }
+
+            return result;
         },
         {
-            connection,          // 🚨 ESSENCIAL (BullMQ)
-            concurrency: 1,      // Cloud Run é mais estável assim
-            limiter: {
-                max: 5,
-                duration: 1000
-            }
+            connection,
+            concurrency: 5,
+            limiter: { max: 10, duration: 1000 },
+            lockDuration: 60000
         }
     );
 
-    // Logs apenas informativos, sem lógica de retry
-    workerInstance.on('completed', (job) => {
-        // console.log(`[Job ${job.id}] Completado (Evento BullMQ).`);
-    });
-
     workerInstance.on('failed', (job, err) => {
-        console.error(`[Job ${job.id}] ☠️ Falha Crítica BullMQ: ${err.message}`);
+        console.error(`[Job ${job.id}] ☠️ Erro Crítico BullMQ: ${err.message}`);
     });
 
     return workerInstance;

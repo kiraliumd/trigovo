@@ -29,25 +29,88 @@ export async function scrapeBooking(pnr: string, lastname: string, airline: Airl
     const useCloud = process.env.NODE_ENV === 'production' || process.env.USE_CLOUD_SCRAPER === 'true';
 
     if (useCloud) {
-        console.log(`📡 Delegando scraping para Cloud Run: ${airline} ${pnr}`);
+        console.log(`📡 Delegando scraping para Cloud Run (Async Queue): ${airline} ${pnr}`);
         try {
-            const response = await fetch(SCRAPER_SERVICE_URL, {
+            // 1. Submit Job
+            const submitResponse = await fetch(SCRAPER_SERVICE_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ pnr, lastname, airline, origin }),
-                cache: 'no-store' // Importante para não cachear erro
+                cache: 'no-store'
             });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Erro no Cloud Scraper (${response.status}): ${errorText}`);
+            if (!submitResponse.ok) {
+                const errorText = await submitResponse.text();
+                throw new Error(`Erro ao enviar job para Cloud Scraper (${submitResponse.status}): ${errorText}`);
             }
 
-            const data = await response.json();
-            return data as BookingDetails;
+            const submitData = await submitResponse.json();
+            const { jobId, status: initialStatus, result: initialResult } = submitData;
+
+            console.log(`Job submetido. Status inicial: ${initialStatus}, JobID: ${jobId}`);
+
+            // Caso 1: Sucesso Imediato (Cache Hit)
+            if (initialStatus === 'completed' && initialResult) {
+                console.log('⚡ Scraping retornado do cache imediatamente.');
+                if (!initialResult.flightNumber && initialResult.pnr) {
+                    console.warn("Aviso: flightNumber veio vazio do cache.");
+                }
+                return initialResult as BookingDetails;
+            }
+
+            // Caso 2: Job Enfileirado (Necessário Pooling)
+            if (!jobId) {
+                throw new Error('Servidor retornou status incompleto (sem jobId e sem resultado).');
+            }
+
+            // 2. Poll for Result
+            let attempts = 0;
+            const maxAttempts = 60; // 2 minutos (2s interval)
+            const pollInterval = 2000;
+
+            const pollUrl = SCRAPER_SERVICE_URL.replace('/scrape', `/scrape/${jobId}`);
+
+            while (attempts < maxAttempts) {
+                attempts++;
+                await new Promise(resolve => setTimeout(resolve, pollInterval));
+
+                const pollResponse = await fetch(pollUrl, { cache: 'no-store' });
+                if (!pollResponse.ok) {
+                    console.warn(`Erro ao consultar status do job ${jobId}: ${pollResponse.status}`);
+                    continue;
+                }
+
+                const jobStatus = await pollResponse.json();
+                console.log(`Job ${jobId} status: ${jobStatus.status} (Tentativa ${attempts}/${maxAttempts})`);
+
+                if (jobStatus.status === 'completed') {
+                    if (!jobStatus.result) throw new Error('Job completado mas sem resultado.');
+
+                    // Normalização do resultado
+                    const result = jobStatus.result;
+                    // Garante que flightNumber venha preenchido
+                    if (!result.flightNumber && result.pnr) {
+                        // Fallback temporário se o scraper falhou no parse mas retornou o objeto
+                        console.warn("Aviso: flightNumber veio vazio do scraper.");
+                    }
+
+                    return result as BookingDetails;
+                }
+
+                if (jobStatus.status === 'failed') {
+                    throw new Error(`Job falhou no servidor: ${jobStatus.failedReason || 'Erro desconhecido'}`);
+                }
+
+                if (jobStatus.status === 'active' || jobStatus.status === 'waiting' || jobStatus.status === 'queued') {
+                    continue; // Espera mais um pouco
+                }
+            }
+
+            throw new Error('Timeout aguardando Cloud Scraper.');
+
         } catch (error) {
             console.error('Falha na comunicação com Scraper Service:', error);
-            throw error; // Repassa o erro para a UI tratar
+            throw error;
         }
     }
 

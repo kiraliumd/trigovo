@@ -6,7 +6,8 @@ WORKDIR /app
 # Copy package.json and install dependencies
 COPY package.json ./
 RUN npm install
-RUN npx playwright install --with-deps chromium
+# 🚨 IMPORTANTE: Instala Chromium (Latam/Azul) E WebKit (GOL Mobile)
+RUN npx playwright install --with-deps chromium webkit
 
 # Copy source code
 COPY . .

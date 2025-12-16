@@ -50,15 +50,19 @@ export async function fetchBookingDetails(pnr: string, lastname: string, airline
         const bookingDetails = await scrapeBooking(pnr, lastname, airline, origin)
 
         // 3. Get or Create Flight (Normalization)
+        const flightInsert = {
+            flight_number: bookingDetails.flightNumber,
+            departure_date: bookingDetails.departureDate,
+            origin: bookingDetails.origin,
+            destination: bookingDetails.destination,
+            status: 'Confirmado'
+        }
+
+        console.log('Dados indo para o banco (flights):', JSON.stringify(flightInsert, null, 2));
+
         const { data: flightData, error: flightError } = await supabase
             .from('flights')
-            .upsert({
-                flight_number: bookingDetails.flightNumber,
-                departure_date: bookingDetails.departureDate,
-                origin: bookingDetails.origin,
-                destination: bookingDetails.destination,
-                status: 'Confirmado'
-            }, {
+            .upsert(flightInsert, {
                 onConflict: 'flight_number, departure_date'
             })
             .select()

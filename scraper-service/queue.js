@@ -2,21 +2,21 @@ const { Queue } = require('bullmq');
 const IORedis = require('ioredis');
 
 /**
- * ==============================
+ * =============================
  * CONFIGURAÇÃO REDIS
- * ==============================
+ * =============================
  */
 
 const redisUrl = process.env.REDIS_URL;
 
 if (!redisUrl) {
-    throw new Error('❌ REDIS_URL não definida');
+    throw new Error('❌ REDIS_URL não definida no .env');
 }
 
-// Detecta TLS automaticamente (Upstash usa rediss://)
+// Detecta se é conexão segura (rediss://)
 const isTls = redisUrl.startsWith('rediss://');
 
-// 🔹 Cliente Redis REAL (para cache)
+// 1. Cliente Redis Genérico (para Cache Manual)
 const redisClient = new IORedis(redisUrl, {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
@@ -24,29 +24,35 @@ const redisClient = new IORedis(redisUrl, {
     ...(isTls ? { tls: { rejectUnauthorized: false } } : {})
 });
 
-// 🔹 Conexão para BullMQ (fila)
+// 2. Configuração de Conexão Compartilhada para o BullMQ
 const connection = {
     url: redisUrl,
     connectTimeout: 30000,
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
-    retryStrategy: (times) => Math.min(times * 1000, 10000)
+    ...(isTls ? { tls: { rejectUnauthorized: false } } : {})
 };
 
 /**
- * ==============================
+ * =============================
  * FILA DE SCRAPING
- * ==============================
+ * =============================
  */
 
 const scrapeQueue = new Queue('scrape-queue', { connection });
 
 async function addScrapeJob(data) {
     return await scrapeQueue.add('scrape-job', data, {
-        attempts: 1, // 🚨 SEM RETRY EM PRODUÇÃO
-        backoff: undefined, // Garantir sem backoff
-        removeOnComplete: true, // Limpa sucesso imediatamente
-        removeOnFail: true // Limpa falha imediatamente
+        attempts: 1,
+        backoff: undefined,
+        // 🚨 CORREÇÃO AQUI: NÃO REMOVER IMEDIATAMENTE
+        removeOnComplete: {
+            age: 3600, // Manter jobs completados por 1 hora
+            count: 1000 // Ou manter os últimos 1000
+        },
+        removeOnFail: {
+            age: 24 * 3600 // Manter falhas por 24 horas (bom para debug)
+        }
     });
 }
 
@@ -55,9 +61,9 @@ async function getJob(jobId) {
 }
 
 /**
- * ==============================
- * CACHE (REDIS)
- * ==============================
+ * =============================
+ * CACHE (REDIS MANUAL)
+ * =============================
  */
 
 function getCacheKey(pnr, lastname, provider) {
@@ -65,21 +71,24 @@ function getCacheKey(pnr, lastname, provider) {
 }
 
 async function getCachedResult(pnr, lastname, provider) {
-    const key = getCacheKey(pnr, lastname, provider);
-    const data = await redisClient.get(key);
-    return data ? JSON.parse(data) : null;
+    try {
+        const key = getCacheKey(pnr, lastname, provider);
+        const data = await redisClient.get(key);
+        return data ? JSON.parse(data) : null;
+    } catch (e) {
+        console.error('Erro Redis Cache Get:', e);
+        return null;
+    }
 }
 
 async function setCachedResult(pnr, lastname, provider, data, ttlSeconds = 300) {
-    const key = getCacheKey(pnr, lastname, provider);
-    await redisClient.set(key, JSON.stringify(data), 'EX', ttlSeconds);
+    try {
+        const key = getCacheKey(pnr, lastname, provider);
+        await redisClient.set(key, JSON.stringify(data), 'EX', ttlSeconds);
+    } catch (e) {
+        console.error('Erro Redis Cache Set:', e);
+    }
 }
-
-/**
- * ==============================
- * EXPORTS
- * ==============================
- */
 
 module.exports = {
     scrapeQueue,

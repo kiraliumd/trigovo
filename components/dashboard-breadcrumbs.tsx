@@ -66,6 +66,14 @@ export function DashboardBreadcrumbs() {
                     // Skip the "dashboard" segment itself if we already have "Plataforma" as root
                     if (item.href === '/dashboard') return null
 
+                    // Skip "Detalhes da Reserva" (UUID) ONLY IF we are on the boarding-pass page
+                    // Structure: /dashboard/flights/[UUID]/boarding-pass
+                    // We want: Plataforma > Reservas > Cartão de Embarque
+                    const isBoardingPassPage = segments.includes('boarding-pass');
+                    if (isBoardingPassPage && (item.label === 'Detalhes da Reserva' || item.label === 'Detalhes')) {
+                        return null;
+                    }
+
                     return (
                         <React.Fragment key={item.href}>
                             <BreadcrumbItem>
