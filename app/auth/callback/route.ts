@@ -6,8 +6,6 @@ export async function GET(request: Request) {
 
     // Verifica se recebeu o código de autorização (PKCE)
     const code = searchParams.get('code')
-    // Verifica o parâmetro 'next' para redirecionar o usuário depois (padrão: /dashboard)
-    const next = searchParams.get('next') ?? '/dashboard'
 
     // Verifica erros retornados pelo Supabase (ex: link expirado)
     const error = searchParams.get('error')
@@ -23,24 +21,38 @@ export async function GET(request: Request) {
         const supabase = await createClient()
 
         // Troca o código pela sessão do usuário
-        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
 
-        if (!error) {
+        if (!exchangeError) {
             console.log('✅ Auth Session Exchanged Successfully')
 
-            // SUCESSO: Redireciona para o dashboard limpo (sem o código na URL)
-            const forwardedHost = request.headers.get('x-forwarded-host')
-            const isLocalEnv = process.env.NODE_ENV === 'development'
+            // Busca o usuário atual
+            const { data: { user } } = await supabase.auth.getUser()
 
-            if (isLocalEnv) {
-                return NextResponse.redirect(`${origin}${next}`)
-            } else if (forwardedHost) {
-                return NextResponse.redirect(`https://${forwardedHost}${next}`)
-            } else {
-                return NextResponse.redirect(`${origin}${next}`)
+            if (user) {
+                // Verifica se a agência já existe no banco
+                const { data: agency } = await supabase
+                    .from('agencies')
+                    .select('id')
+                    .eq('id', user.id)
+                    .single()
+
+                const next = agency ? '/dashboard' : '/onboarding'
+
+                // SUCESSO: Redireciona para o destino correto
+                const forwardedHost = request.headers.get('x-forwarded-host')
+                const isLocalEnv = process.env.NODE_ENV === 'development'
+
+                if (isLocalEnv) {
+                    return NextResponse.redirect(`${origin}${next}`)
+                } else if (forwardedHost) {
+                    return NextResponse.redirect(`https://${forwardedHost}${next}`)
+                } else {
+                    return NextResponse.redirect(`${origin}${next}`)
+                }
             }
         } else {
-            console.error('❌ Erro na troca de token Supabase:', error)
+            console.error('❌ Erro na troca de token Supabase:', exchangeError)
         }
     } else {
         console.error('❌ Auth Callback Error: No code provided')
