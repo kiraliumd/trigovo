@@ -4,14 +4,25 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { scrapeBooking, type Airline } from '@/lib/scraper'
+import { z } from 'zod'
+
+// Schema de validação para inputs do usuário
+const bookingSchema = z.object({
+    pnr: z.string().min(5).max(20).regex(/^[a-zA-Z0-9]+$/),
+    lastname: z.string().min(2).max(50),
+    airline: z.enum(['LATAM', 'GOL', 'AZUL']),
+    origin: z.string().length(3).optional()
+})
 
 export async function fetchBookingDetails(pnr: string, lastname: string, airline: Airline, origin?: string) {
+    // 0. Validação de Input
+    const validated = bookingSchema.safeParse({ pnr, lastname, airline, origin })
+    if (!validated.success) {
+        throw new Error('Dados de reserva inválidos. Verifique o PNR e o sobrenome.')
+    }
+
     // 1. Aguarde os cookies (Obrigatório no Next 16)
     const cookieStore = await cookies()
-
-    // Debug de Cookies (Sherlock Holmes)
-    const allCookies = cookieStore.getAll().map(c => c.name)
-    console.log("🍪 COOKIES CHEGANDO NO SERVIDOR:", allCookies)
 
     // 2. Crie o cliente manualmente dentro da Action
     const supabase = createServerClient(
@@ -39,8 +50,7 @@ export async function fetchBookingDetails(pnr: string, lastname: string, airline
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (!user) {
-        console.error("❌ Erro Auth: Usuário nulo. Erro Supabase:", authError)
-        throw new Error(`Usuário não autenticado. Cookies visíveis: ${allCookies.join(', ')}`)
+        throw new Error("Você não tem permissão para realizar esta ação. Por favor, faça login novamente.")
     }
 
     console.log("✅ Usuário Autenticado:", user.id)

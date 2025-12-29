@@ -11,7 +11,8 @@ chromiumExtra.use(stealth());
 const SESSION_FILE = path.join(__dirname, 'session_gol.json');
 
 // --- CONFIGURAÇÃO DE PROXY ---
-const PROXY_SERVER = process.env.PROXY_SERVER || 'http://p.webshare.io:80';
+const PROXY_SERVER = process.env.PROXY_SERVER;
+const PROXY_USERNAME = process.env.PROXY_USERNAME;
 const PROXY_PASSWORD = process.env.PROXY_PASSWORD;
 const TOTAL_PROXIES = parseInt(process.env.TOTAL_PROXIES || '250');
 
@@ -36,10 +37,11 @@ async function humanPause(baseMs = 400) {
 }
 
 function getRandomProxy() {
+    if (!PROXY_SERVER || !PROXY_USERNAME || !PROXY_PASSWORD) return undefined;
     const randomIndex = randomInt(1, TOTAL_PROXIES);
     return {
         server: PROXY_SERVER,
-        username: `xtweuspr-BR-${randomIndex}`,
+        username: `${PROXY_USERNAME}-${randomIndex}`,
         password: PROXY_PASSWORD
     };
 }
