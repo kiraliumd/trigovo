@@ -131,7 +131,7 @@ async function launchBrowser(useProxy) {
     }
 
     return await chromiumExtra.launch({
-        headless: process.env.PLAYWRIGHT_HEADLESS !== 'false',
+        headless: process.env.HEADLESS !== 'false' && process.env.PLAYWRIGHT_HEADLESS !== 'false',
         proxy: proxyConfig,
         slowMo: randomInt(35, 95),
         args: [

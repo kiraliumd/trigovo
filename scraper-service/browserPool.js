@@ -21,8 +21,8 @@ class BrowserPool {
                 console.log('🚀 Inicializando Browser Pool...');
                 // Usando chromiumExtra para stealth mode
                 this.browser = await chromiumExtra.launch({
-                    headless: false, // 👈 IMPORTANTE
-                    slowMo: 100,     // 👈 desacelera para você ver
+                    headless: process.env.HEADLESS !== 'false' && process.env.PLAYWRIGHT_HEADLESS !== 'false',
+                    slowMo: process.env.HEADLESS === 'false' ? 100 : 0,     // Desacelera apenas se não for headless
                     args: [
                         '--disable-blink-features=AutomationControlled',
                         '--no-sandbox',
