@@ -7,9 +7,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { fetchBookingDetails } from '@/app/actions/fetch-booking'
+import { startScraperJob, checkScraperJobStatus, saveScraperResult } from '@/app/actions/fetch-booking'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { PlusSignIcon } from '@hugeicons/core-free-icons'
+import { PlusSignIcon, Loading03Icon } from '@hugeicons/core-free-icons'
 import {
     Dialog,
     DialogContent,
@@ -33,6 +33,7 @@ export function AddFlightDialog() {
     const [origin, setOrigin] = useState('')
     const [airline, setAirline] = useState<string>('')
     const [loading, setLoading] = useState(false)
+    const [statusMessage, setStatusMessage] = useState('')
     const router = useRouter()
 
     const handleAirlineSelect = (selected: string) => {
@@ -44,6 +45,7 @@ export function AddFlightDialog() {
         setStep('select-airline')
         setAirline('')
         setOrigin('')
+        setStatusMessage('')
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -54,13 +56,48 @@ export function AddFlightDialog() {
         }
 
         setLoading(true)
+        setStatusMessage('Iniciando robô...')
 
         try {
-            // Para AZUL, o sobrenome é opcional no form, mas a função espera uma string.
-            // Enviamos um valor padrão se estiver vazio.
             const finalLastName = (airline === 'AZUL' && !lastName) ? 'AZUL-PASSENGER' : lastName;
 
-            await fetchBookingDetails(pnr, finalLastName, airline as any, origin)
+            // 1. Iniciar Job
+            const startResult = await startScraperJob(pnr, finalLastName, airline as any, origin)
+
+            let bookingData = startResult.initialResult;
+
+            // 2. Polling (se não for cache hit)
+            if (startResult.jobId && !bookingData) {
+                setStatusMessage('Aguardando na fila...')
+
+                const pollInterval = 3000;
+                const maxAttempts = 40; // ~2 minutos
+                let attempts = 0;
+
+                while (attempts < maxAttempts) {
+                    attempts++;
+                    await new Promise(r => setTimeout(r, pollInterval));
+
+                    const job = await checkScraperJobStatus(startResult.jobId);
+
+                    if (job.status === 'active') {
+                        setStatusMessage('Buscando dados na companhia...');
+                    } else if (job.status === 'completed') {
+                        bookingData = job.result;
+                        break;
+                    } else if (job.status === 'failed') {
+                        throw new Error(job.error || 'O robô falhou ao buscar os dados.');
+                    }
+                }
+
+                if (!bookingData) {
+                    throw new Error('Tempo esgotado. O robô está demorando mais que o esperado. Tente novamente em instantes.');
+                }
+            }
+
+            // 3. Salvar Resultado
+            setStatusMessage('Salvando bilhete...')
+            await saveScraperResult(pnr, airline as any, bookingData, finalLastName)
 
             toast.success('Voo adicionado com sucesso!')
             setOpen(false)
@@ -72,10 +109,12 @@ export function AddFlightDialog() {
             setOrigin('')
             setAirline('')
             setStep('select-airline')
+            setStatusMessage('')
 
         } catch (error: any) {
             console.error(error)
             toast.error(error.message)
+            setStatusMessage('')
         } finally {
             setLoading(false)
         }
@@ -204,8 +243,20 @@ export function AddFlightDialog() {
                             )}
                         </div>
 
-                        <Button type="submit" className="w-full mt-4" disabled={loading}>
-                            {loading ? 'Buscando Reserva...' : 'Adicionar Voo'}
+                        {statusMessage && (
+                            <div className="flex items-center justify-center gap-2 py-2 text-sm text-[#191e3b]">
+                                <HugeiconsIcon icon={Loading03Icon} className="size-4 animate-spin" />
+                                <span>{statusMessage}</span>
+                            </div>
+                        )}
+
+                        <Button type="submit" className="w-full mt-2" disabled={loading}>
+                            {loading ? (
+                                <>
+                                    <HugeiconsIcon icon={Loading03Icon} className="size-4 animate-spin mr-2" />
+                                    Processando...
+                                </>
+                            ) : 'Adicionar Voo'}
                         </Button>
                     </form>
                 )}

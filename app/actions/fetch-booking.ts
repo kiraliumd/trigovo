@@ -3,7 +3,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
-import { scrapeBooking, type Airline } from '@/lib/scraper'
+import { submitScrapeJob, getScraperJobStatus, type Airline, type BookingDetails } from '@/lib/scraper'
 import { z } from 'zod'
 
 // Schema de validação para inputs do usuário
@@ -14,52 +14,90 @@ const bookingSchema = z.object({
     origin: z.string().length(3).optional()
 })
 
-export async function fetchBookingDetails(pnr: string, lastname: string, airline: Airline, origin?: string) {
-    // 0. Validação de Input
+/**
+ * 1. Inicia o Job no Scraper e retorna o JobID
+ */
+export async function startScraperJob(pnr: string, lastname: string, airline: Airline, origin?: string) {
     const validated = bookingSchema.safeParse({ pnr, lastname, airline, origin })
-    if (!validated.success) {
-        throw new Error('Dados de reserva inválidos. Verifique o PNR e o sobrenome.')
-    }
+    if (!validated.success) throw new Error('Dados inválidos.')
 
-    // 1. Aguarde os cookies (Obrigatório no Next 16)
     const cookieStore = await cookies()
-
-    // 2. Crie o cliente manualmente dentro da Action
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             cookies: {
-                getAll() {
-                    return cookieStore.getAll()
-                },
+                getAll() { return cookieStore.getAll() },
                 setAll(cookiesToSet) {
                     try {
-                        cookiesToSet.forEach(({ name, value, options }) =>
-                            cookieStore.set(name, value, options)
-                        )
-                    } catch {
-                        // Ignorar erros de setar cookies em Server Action
-                    }
+                        cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
+                    } catch { }
                 },
             },
         }
     )
 
-    // 3. Verifique o usuário de forma segura
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error("Não autenticado.")
 
-    if (!user) {
-        throw new Error("Você não tem permissão para realizar esta ação. Por favor, faça login novamente.")
-    }
+    // Inicia o job e retorna jobId
+    const finalLastName = (airline === 'AZUL' && !lastname) ? 'AZUL-PASSENGER' : lastname;
+    const result = await submitScrapeJob(pnr, finalLastName, airline, origin, user.id);
 
-    console.log("✅ Usuário Autenticado:", user.id)
+    return { success: true, jobId: result.jobId, initialStatus: result.status, initialResult: result.result };
+}
+
+/**
+ * 2. Consulta o Status do Job (Ação segura para o cliente chamar)
+ */
+export async function checkScraperJobStatus(jobId: string) {
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll() { return cookieStore.getAll() },
+                setAll(cookiesToSet) {
+                    try {
+                        cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
+                    } catch { }
+                },
+            },
+        }
+    )
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error("Não autenticado.")
+
+    return await getScraperJobStatus(jobId);
+}
+
+/**
+ * 3. Salva o resultado final no Banco de Dados
+ */
+export async function saveScraperResult(pnr: string, airline: Airline, bookingDetails: BookingDetails, originalLastname: string) {
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll() { return cookieStore.getAll() },
+                setAll(cookiesToSet) {
+                    try {
+                        cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
+                    } catch { }
+                },
+            },
+        }
+    )
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error("Não autenticado.")
 
     try {
-        // 2. Scrape Data
-        const bookingDetails = await scrapeBooking(pnr, lastname, airline, origin, user.id)
-
-        // 3. Get or Create Flight (Normalization)
+        // 1. Get or Create Flight
         const flightInsert = {
             flight_number: bookingDetails.flightNumber,
             departure_date: bookingDetails.departureDate,
@@ -68,47 +106,32 @@ export async function fetchBookingDetails(pnr: string, lastname: string, airline
             status: 'Confirmado'
         }
 
-        console.log('Dados indo para o banco (flights):', JSON.stringify(flightInsert, null, 2));
-
         const { data: flightData, error: flightError } = await supabase
             .from('flights')
-            .upsert(flightInsert, {
-                onConflict: 'flight_number, departure_date'
-            })
-            .select()
-            .single()
+            .upsert(flightInsert, { onConflict: 'flight_number, departure_date' })
+            .select().single()
 
-        if (flightError) {
-            console.error('Error upserting flight:', flightError)
-            throw new Error('Falha ao registrar voo no sistema')
-        }
+        if (flightError) throw flightError
 
-        // 4. Inserção no Banco de Dados (Server-Side)
-
-        // Lógica de Sobrenome: Prioriza o Input do Usuário
-        let finalPassengerLastname = lastname.toUpperCase();
-
-        // Apenas para AZUL (onde o usuário não digita sobrenome), tentamos extrair do robô
-        if (lastname === 'AZUL-PASSENGER' && bookingDetails.itinerary_details?.passengers?.length > 0) {
+        // 2. Normalização de Sobrenome
+        let finalPassengerLastname = originalLastname.toUpperCase();
+        if (originalLastname === 'AZUL-PASSENGER' && bookingDetails.itinerary_details?.passengers?.length > 0) {
             const firstPax = bookingDetails.itinerary_details.passengers[0];
             if (firstPax.name) {
                 const parts = firstPax.name.trim().split(' ');
-                if (parts.length > 1) {
-                    finalPassengerLastname = parts.pop() || 'AZUL-PASSENGER';
-                }
+                if (parts.length > 1) finalPassengerLastname = parts.pop() || 'AZUL-PASSENGER';
             }
         }
 
+        // 3. Upsert Ticket
         const { error: dbError } = await supabase
             .from('tickets')
             .upsert({
                 agency_id: user.id,
                 pnr: pnr.toUpperCase(),
-                passenger_lastname: finalPassengerLastname, // Usa a variável corrigida
-                // passenger_name: REMOVIDO para não sobrescrever dados manuais da agência
+                passenger_lastname: finalPassengerLastname,
                 airline: airline,
                 flight_id: flightData.id,
-                // Legacy Columns
                 flight_number: bookingDetails.flightNumber,
                 flight_date: bookingDetails.departureDate,
                 origin: bookingDetails.origin,
@@ -116,17 +139,24 @@ export async function fetchBookingDetails(pnr: string, lastname: string, airline
                 status: 'Confirmado',
                 checkin_status: 'Fechado',
                 itinerary_details: bookingDetails.itinerary_details
-            }, {
-                onConflict: 'pnr, agency_id'
-            })
+            }, { onConflict: 'pnr, agency_id' })
 
         if (dbError) throw dbError
 
         revalidatePath('/dashboard/flights')
-        return { success: true, data: bookingDetails }
+        return { success: true }
 
     } catch (error) {
-        console.error(`Action failed for ${airline} ${pnr}:`, error)
-        throw new Error(`Falha ao adicionar voo: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+        console.error("Save result failed:", error)
+        throw new Error("Falha ao salvar dados no banco.")
     }
+}
+
+// Mantendo para compatibilidade ou se necessário chamar síncrono internamente
+export async function fetchBookingDetails(pnr: string, lastname: string, airline: Airline, origin?: string) {
+    const job = await startScraperJob(pnr, lastname, airline, origin);
+    if (job.initialStatus === 'completed' && job.initialResult) {
+        return await saveScraperResult(pnr, airline, job.initialResult, lastname);
+    }
+    throw new Error("Esta ação agora requer polling no cliente e não pode ser chamada de forma síncrona simples.");
 }

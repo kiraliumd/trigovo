@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Refresh01Icon } from '@hugeicons/core-free-icons'
-import { refreshFlight } from '@/app/actions/refresh-flight'
+import { startScraperJob, checkScraperJobStatus, saveScraperResult } from '@/app/actions/fetch-booking'
 import { toast } from 'sonner'
+import { Loading03Icon } from '@hugeicons/core-free-icons'
 
 interface RefreshButtonProps {
     ticketId: string
@@ -20,14 +21,40 @@ export function RefreshButton({ ticketId, pnr, lastName, airline }: RefreshButto
     const handleRefresh = async () => {
         setLoading(true)
         try {
-            const result = await refreshFlight(ticketId, pnr, lastName, airline)
-            if (result.success) {
-                toast.success('Flight updated successfully')
-            } else {
-                toast.error(result.error)
+            // 1. Iniciar Job
+            const startResult = await startScraperJob(pnr, lastName, airline as any)
+
+            let bookingData = startResult.initialResult;
+
+            // 2. Polling
+            if (startResult.jobId && !bookingData) {
+                const pollInterval = 3000;
+                const maxAttempts = 40;
+                let attempts = 0;
+
+                while (attempts < maxAttempts) {
+                    attempts++;
+                    await new Promise(r => setTimeout(r, pollInterval));
+                    const job = await checkScraperJobStatus(startResult.jobId);
+
+                    if (job.status === 'completed') {
+                        bookingData = job.result;
+                        break;
+                    } else if (job.status === 'failed') {
+                        throw new Error(job.error || 'Falha ao atualizar voo.');
+                    }
+                }
             }
-        } catch (error) {
-            toast.error('Failed to refresh')
+
+            if (!bookingData) throw new Error('Timeout ao atualizar voo.');
+
+            // 3. Salvar
+            await saveScraperResult(pnr, airline as any, bookingData, lastName)
+            toast.success('Voo atualizado com sucesso!')
+
+        } catch (error: any) {
+            console.error('Refresh error:', error)
+            toast.error(error.message || 'Erro ao atualizar')
         } finally {
             setLoading(false)
         }

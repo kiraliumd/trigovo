@@ -125,7 +125,11 @@ async function launchBrowser(useProxy) {
 
     if (useProxy) {
         proxyConfig = getRandomProxy();
-        console.log(`🔌 Conectando via Proxy (${proxyConfig.username})...`);
+        if (proxyConfig) {
+            console.log(`🔌 Conectando via Proxy (${proxyConfig.username})...`);
+        } else {
+            console.warn(`⚠️ Proxy solicitado mas não configurado. Continuando SEM proxy.`);
+        }
     } else {
         console.log(`⚡ Conectando via Direta (Sem Proxy)...`);
     }

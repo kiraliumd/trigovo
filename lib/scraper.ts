@@ -24,6 +24,48 @@ function getRandomUserAgent() {
 
 const SCRAPER_SERVICE_URL = process.env.SCRAPER_SERVICE_URL || 'https://scraper-voos-905122424233.southamerica-east1.run.app/scrape';
 
+/**
+ * Inicia um job de scraping no Cloud Run
+ */
+export async function submitScrapeJob(pnr: string, lastname: string, airline: Airline, origin?: string, agencyId?: string) {
+    console.log(`📡 Enviando job para Cloud Run: ${airline} ${pnr}`);
+    const response = await fetch(SCRAPER_SERVICE_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.INTERNAL_API_KEY || ''
+        },
+        body: JSON.stringify({ pnr, lastname, airline, origin, agencyId }),
+        cache: 'no-store'
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erro ao enviar job (${response.status}): ${errorText}`);
+    }
+
+    return await response.json();
+}
+
+/**
+ * Consulta o status de um job de scraping
+ */
+export async function getScraperJobStatus(jobId: string) {
+    const pollUrl = SCRAPER_SERVICE_URL.replace('/scrape', `/scrape/${jobId}`);
+    const response = await fetch(pollUrl, {
+        cache: 'no-store',
+        headers: {
+            'x-api-key': process.env.INTERNAL_API_KEY || ''
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Erro ao consultar status (${response.status})`);
+    }
+
+    return await response.json();
+}
+
 export async function scrapeBooking(pnr: string, lastname: string, airline: Airline, origin?: string, agencyId?: string): Promise<BookingDetails> {
     // Se estivermos em produção ou forçado via ENV, usa o Cloud Run
     const useCloud = process.env.NODE_ENV === 'production' || process.env.USE_CLOUD_SCRAPER === 'true';
