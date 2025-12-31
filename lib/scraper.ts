@@ -22,14 +22,16 @@ function getRandomUserAgent() {
     return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]
 }
 
-const SCRAPER_SERVICE_URL = process.env.SCRAPER_SERVICE_URL || 'https://scraper-voos-905122424233.southamerica-east1.run.app/scrape';
+const SCRAPER_SERVICE_URL = process.env.SCRAPER_SERVICE_URL || 'https://scraper-voos-905122424233.southamerica-east1.run.app';
 
 /**
  * Inicia um job de scraping no Cloud Run
  */
 export async function submitScrapeJob(pnr: string, lastname: string, airline: Airline, origin?: string, agencyId?: string) {
     console.log(`📡 Enviando job para Cloud Run: ${airline} ${pnr}`);
-    const response = await fetch(SCRAPER_SERVICE_URL, {
+    const submitUrl = SCRAPER_SERVICE_URL.endsWith('/scrape') ? SCRAPER_SERVICE_URL : `${SCRAPER_SERVICE_URL}/scrape`;
+
+    const response = await fetch(submitUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -51,7 +53,9 @@ export async function submitScrapeJob(pnr: string, lastname: string, airline: Ai
  * Consulta o status de um job de scraping
  */
 export async function getScraperJobStatus(jobId: string) {
-    const pollUrl = SCRAPER_SERVICE_URL.replace('/scrape', `/scrape/${jobId}`);
+    const baseUrl = SCRAPER_SERVICE_URL.replace(/\/scrape$/, '');
+    const pollUrl = `${baseUrl}/scrape/${jobId}`;
+
     const response = await fetch(pollUrl, {
         cache: 'no-store',
         headers: {
