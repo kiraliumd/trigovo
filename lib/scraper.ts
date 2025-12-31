@@ -34,7 +34,10 @@ export async function scrapeBooking(pnr: string, lastname: string, airline: Airl
             // 1. Submit Job
             const submitResponse = await fetch(SCRAPER_SERVICE_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': process.env.INTERNAL_API_KEY || ''
+                },
                 body: JSON.stringify({ pnr, lastname, airline, origin, agencyId }),
                 cache: 'no-store'
             });
@@ -74,7 +77,10 @@ export async function scrapeBooking(pnr: string, lastname: string, airline: Airl
                 attempts++;
                 await new Promise(resolve => setTimeout(resolve, pollInterval));
 
-                const pollResponse = await fetch(pollUrl, { cache: 'no-store' });
+                const pollResponse = await fetch(pollUrl, {
+                    cache: 'no-store',
+                    headers: { 'x-api-key': process.env.INTERNAL_API_KEY || '' }
+                });
                 if (!pollResponse.ok) {
                     console.warn(`Erro ao consultar status do job ${jobId}: ${pollResponse.status}`);
                     continue;

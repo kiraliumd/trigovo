@@ -1,19 +1,23 @@
 'use server'
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 export async function updatePassengerName(ticketId: string, newName: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { success: false, error: 'Usuário não autenticado' }
+    }
+
     try {
         const { error } = await supabase
             .from('tickets')
             .update({ passenger_name: newName })
             .eq('id', ticketId)
+        // RLS ensures the user can only update their own tickets
+        // but we can add .eq('agency_id', user.id) for extra safety if needed.
 
         if (error) throw error
 

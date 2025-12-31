@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
 import { validatePNR } from '@/lib/pnr-validator';
-import { supabase } from '@/lib/supabase/client'; // Note: Should use server client for DB ops
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
     try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const { pnr, lastName } = await request.json();
 
         if (!pnr || !lastName) {

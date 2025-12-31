@@ -5,8 +5,26 @@ const { addScrapeJob, getJob, getCachedResult } = require('./queue');
 const app = express();
 app.use(express.json());
 
+// Middleware de Autenticação Interna
+const validateApiKey = (req, res, next) => {
+    const apiKey = req.headers['x-api-key'];
+    const internalSecret = process.env.INTERNAL_API_KEY;
+
+    // Em desenvolvimento, se a chave não estiver configurada, avisa mas permite
+    if (!internalSecret && process.env.NODE_ENV === 'development') {
+        console.warn('⚠️ INTERNAL_API_KEY não configurada. Operando em modo inseguro local.');
+        return next();
+    }
+
+    if (!apiKey || apiKey !== internalSecret) {
+        console.error('🚫 Tentativa de acesso não autorizada ao Scraper.');
+        return res.status(401).json({ error: 'Unauthorized: Invalid or missing API Key' });
+    }
+    next();
+};
+
 // Endpoint Principal
-app.post('/scrape', async (req, res) => {
+app.post('/scrape', validateApiKey, async (req, res) => {
     const { airline, pnr, lastname, origin, agencyId } = req.body;
 
     if (!airline || !pnr || !lastname) {
@@ -36,7 +54,7 @@ app.post('/scrape', async (req, res) => {
 });
 
 // Status do Job
-app.get('/scrape/:jobId', async (req, res) => {
+app.get('/scrape/:jobId', validateApiKey, async (req, res) => {
     const { jobId } = req.params;
 
     try {

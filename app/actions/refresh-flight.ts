@@ -6,12 +6,17 @@ import { revalidatePath } from 'next/cache'
 
 export async function refreshFlight(ticketId: string, pnr: string, lastName: string, airline: string) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { success: false, error: 'Usuário não autenticado' }
+    }
 
     try {
-        console.log(`Refreshing flight ${pnr}...`)
+        console.log(`Refreshing flight ${pnr} for user ${user.id}...`)
 
-        // Re-run scraper
-        const details = await scrapeBooking(pnr, lastName, airline as any)
+        // Re-run scraper - Pass user.id as agencyId
+        const details = await scrapeBooking(pnr, lastName, airline as any, undefined, user.id)
 
         // Update DB
         const { error } = await supabase
@@ -24,6 +29,7 @@ export async function refreshFlight(ticketId: string, pnr: string, lastName: str
                 updated_at: new Date().toISOString()
             })
             .eq('id', ticketId)
+        // RLS handles the security, but we could add .eq('agency_id', user.id)
 
         if (error) throw error
 
