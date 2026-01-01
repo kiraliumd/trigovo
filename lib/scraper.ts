@@ -572,6 +572,7 @@ async function scrapeGol(pnr: string, lastname: string, origin?: string): Promis
                 departureDate: seg.departure,
                 arrivalDate: seg.arrival,
                 duration: `${Math.floor(seg.duration / 60)}h ${seg.duration % 60}m`,
+                airline: 'GOL',
                 status: seg.segmentStatusCode?.segmentStatus || 'CONFIRMED'
             }));
             return {

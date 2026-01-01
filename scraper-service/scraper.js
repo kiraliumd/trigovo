@@ -313,6 +313,7 @@ function parseGolJson(pnrData, pnr, origin, useProxy) {
             departureDate: seg.departure,
             arrivalDate: seg.arrival,
             duration: `${Math.floor(seg.duration / 60)}h ${seg.duration % 60}m`,
+            airline: 'GOL',
             status: seg.segmentStatusCode?.segmentStatus || 'CONFIRMED'
         }));
         return {
@@ -440,6 +441,7 @@ async function scrapeLatam({ pnr, lastname, useProxy }) {
                 date: seg.departure?.dateTime?.isoValue, // Normalize to 'date' for frontend
                 departureDate: seg.departure?.dateTime?.isoValue, // Keep for backward compat
                 arrivalDate: seg.arrival?.dateTime?.isoValue,
+                airline: 'LATAM',
                 duration: seg.duration || part.totalDuration
             }));
             return {

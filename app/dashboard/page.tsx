@@ -22,7 +22,7 @@ export default async function DashboardPage() {
     // Buscar dados
     const { data: tickets } = await supabase
         .from('tickets')
-        .select('*, flights(*)')
+        .select('*, flights:flights!tickets_flight_id_fkey(*)')
         .eq('agency_id', user?.id)
         .neq('status', 'Cancelado')
         .neq('status', 'Completo')
@@ -200,7 +200,7 @@ export default async function DashboardPage() {
                                 const isCancelled = ticket.status === 'Cancelado' || ticket.flights?.status === 'Cancelado'
                                 const delay = ticket.flights?.delay_minutes || 0
                                 const flightDate = ticket.flights?.departure_date || ticket.flight_date
-                                const dateStr = flightDate 
+                                const dateStr = flightDate
                                     ? format(new Date(flightDate), "d 'DE' MMM", { locale: ptBR }).toUpperCase()
                                     : ''
                                 const origin = ticket.origin || ''

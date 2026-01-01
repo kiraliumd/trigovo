@@ -18,20 +18,10 @@ export async function refreshFlight(ticketId: string, pnr: string, lastName: str
         // Re-run scraper - Pass user.id as agencyId
         const details = await scrapeBooking(pnr, lastName, airline as any, undefined, user.id)
 
-        // Update DB
-        const { error } = await supabase
-            .from('tickets')
-            .update({
-                flight_number: details.flightNumber,
-                flight_date: details.departureDate,
-                origin: details.origin,
-                destination: details.destination,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', ticketId)
-        // RLS handles the security, but we could add .eq('agency_id', user.id)
-
-        if (error) throw error
+        // Import saveScraperResult inside or ensure it's available. 
+        // Since it's a server action, let's call it directly.
+        const { saveScraperResult } = await import('./fetch-booking')
+        await saveScraperResult(pnr, airline as any, details, lastName)
 
         revalidatePath('/dashboard/flights')
         return { success: true }

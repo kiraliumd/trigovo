@@ -22,7 +22,7 @@ export default async function BoardingPassPage({
         .from('tickets')
         .select(`
             *,
-            flights (*)
+            flights:flights!tickets_flight_id_fkey (*)
         `)
         .eq('id', id)
         .eq('agency_id', user.id)

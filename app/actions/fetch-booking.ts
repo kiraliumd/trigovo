@@ -103,23 +103,34 @@ export async function saveScraperResult(pnr: string, airline: Airline, bookingDe
     if (!user) throw new Error("Não autenticado.")
 
     try {
-        // 1. Get or Create Flight
-        const flightInsert = {
-            flight_number: bookingDetails.flightNumber,
-            departure_date: bookingDetails.departureDate,
-            origin: bookingDetails.origin,
-            destination: bookingDetails.destination,
-            status: 'Confirmado'
+        const trips = bookingDetails.itinerary_details?.trips || []
+        const savedFlightIds: string[] = []
+
+        // 1. Extrair todos os segmentos
+        const segmentsToProcess = []
+        if (trips.length === 0) {
+            segmentsToProcess.push({
+                flightNumber: bookingDetails.flightNumber,
+                departureDate: bookingDetails.departureDate,
+                origin: bookingDetails.origin,
+                destination: bookingDetails.destination,
+                arrivalDate: (bookingDetails as any).arrivalDate || null,
+                airline: airline
+            })
+        } else {
+            for (const trip of trips) {
+                for (const segment of trip.segments) {
+                    segmentsToProcess.push({
+                        ...segment,
+                        airline: segment.airline || airline
+                    })
+                }
+            }
         }
 
-        const { data: flightData, error: flightError } = await supabase
-            .from('flights')
-            .upsert(flightInsert, { onConflict: 'flight_number, departure_date' })
-            .select().single()
+        if (segmentsToProcess.length === 0) throw new Error("Nenhum trecho de voo encontrado no itinerário.")
 
-        if (flightError) throw flightError
-
-        // 2. Normalização de Sobrenome
+        // 2. Normalização de Sobrenome (comum à reserva)
         let finalPassengerLastname = originalLastname.toUpperCase();
         if (originalLastname === 'AZUL-PASSENGER' && bookingDetails.itinerary_details?.passengers?.length > 0) {
             const firstPax = bookingDetails.itinerary_details.passengers[0];
@@ -129,32 +140,73 @@ export async function saveScraperResult(pnr: string, airline: Airline, bookingDe
             }
         }
 
-        // 3. Upsert Ticket
-        const { error: dbError } = await supabase
+        // 3. Upsert do Ticket Único (Consolidado por PNR)
+        // Usamos o primeiro trecho para as informações de exibição principal
+        const firstSegment = segmentsToProcess[0]
+        const { data: ticketData, error: ticketError } = await supabase
             .from('tickets')
             .upsert({
                 agency_id: user.id,
                 pnr: pnr.toUpperCase(),
                 passenger_lastname: finalPassengerLastname,
-                airline: airline,
-                flight_id: flightData.id,
-                flight_number: bookingDetails.flightNumber,
-                flight_date: bookingDetails.departureDate,
-                origin: bookingDetails.origin,
-                destination: bookingDetails.destination,
+                airline: airline, // Airline principal da reserva
+                flight_number: firstSegment.flightNumber,
+                flight_date: firstSegment.departureDate || firstSegment.date,
+                origin: firstSegment.origin,
+                destination: firstSegment.destination,
                 status: 'Confirmado',
                 checkin_status: 'Fechado',
                 itinerary_details: bookingDetails.itinerary_details
             }, { onConflict: 'pnr, agency_id' })
+            .select().single()
 
-        if (dbError) throw dbError
+        if (ticketError) throw ticketError
+
+        // 4. Upsert dos Voos e Associações
+        for (const segment of segmentsToProcess) {
+            // Upsert Flight
+            const flightInsert = {
+                flight_number: segment.flightNumber,
+                departure_date: segment.departureDate || segment.date,
+                origin: segment.origin,
+                destination: segment.destination,
+                airline: segment.airline,
+                arrival_date: segment.arrivalDate,
+                status: 'Confirmado'
+            }
+
+            const { data: flightData, error: flightError } = await supabase
+                .from('flights')
+                .upsert(flightInsert, { onConflict: 'flight_number, departure_date' })
+                .select().single()
+
+            if (flightError) throw flightError
+
+            // Vincular Ticket ao Flight na tabela associativa
+            const { error: linkError } = await supabase
+                .from('ticket_flights')
+                .upsert({
+                    ticket_id: ticketData.id,
+                    flight_id: flightData.id
+                }, { onConflict: 'ticket_id, flight_id' })
+
+            if (linkError) throw linkError
+            savedFlightIds.push(flightData.id)
+        }
 
         revalidatePath('/dashboard/flights')
-        return { success: true }
+        return { success: true, ticketId: ticketData.id, count: savedFlightIds.length }
 
-    } catch (error) {
-        console.error("Save result failed:", error)
-        throw new Error("Falha ao salvar dados no banco.")
+    } catch (error: any) {
+        console.error("Save result failed. Full error:", error)
+
+        // Se o erro for de coluna inexistente ou constraint, dar uma dica melhor
+        const errorMessage = error.message || "Erro desconhecido"
+        if (errorMessage.includes("column") || errorMessage.includes("constraint")) {
+            throw new Error(`Erro de banco de dados: ${errorMessage}. Certifique-se de executar o SQL de migração no painel da Supabase.`)
+        }
+
+        throw new Error(`Falha ao salvar dados no banco: ${errorMessage}`)
     }
 }
 

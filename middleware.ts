@@ -26,8 +26,7 @@ export async function middleware(request: NextRequest) {
     // 2. Redirecionamento se não houver usuário em rotas protegidas
     // Adicione aqui outras rotas que devem ser protegidas
     const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') ||
-        request.nextUrl.pathname.startsWith('/onboarding') ||
-        request.nextUrl.pathname.startsWith('/api/cron')
+        request.nextUrl.pathname.startsWith('/onboarding')
 
     if (!user && isProtectedRoute) {
         const url = request.nextUrl.clone()

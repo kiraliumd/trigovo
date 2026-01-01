@@ -49,10 +49,8 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
     }, [])
 
     const filteredTickets = initialTickets?.filter((ticket) => {
-        // Normalize data
-        const flight = ticket.flights || ticket
-        const flightDate = flight.departure_date || ticket.flight_date
-        const status = flight.status || ticket.status
+        // Agora o ticket é consolidado por PNR
+        const flightDate = ticket.flight_date
         const checkinStatus = calculateCheckinStatus(
             ticket.airline as any,
             new Date(flightDate)
@@ -109,25 +107,25 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
         <div className="space-y-4">
             <Tabs defaultValue="todos" value={statusTab} onValueChange={setStatusTab}>
                 <TabsList className="bg-[#f1f3f9] h-9 p-[3px] rounded-lg">
-                    <TabsTrigger 
+                    <TabsTrigger
                         value="todos"
                         className="data-[state=active]:bg-white data-[state=active]:text-[#191e3b] data-[state=active]:shadow-none h-[29px] px-2 py-1 rounded-md text-sm font-medium"
                     >
                         Todos
                     </TabsTrigger>
-                    <TabsTrigger 
+                    <TabsTrigger
                         value="checkin-aberto"
                         className="data-[state=active]:bg-white data-[state=active]:text-[#191e3b] data-[state=active]:shadow-none h-[29px] px-2 py-1 rounded-md text-sm font-medium text-[#4b5173]"
                     >
                         Check-in Aberto
                     </TabsTrigger>
-                    <TabsTrigger 
+                    <TabsTrigger
                         value="checkin-fechado"
                         className="data-[state=active]:bg-white data-[state=active]:text-[#191e3b] data-[state=active]:shadow-none h-[29px] px-2 py-1 rounded-md text-sm font-medium text-[#4b5173]"
                     >
                         Check-in Fechado
                     </TabsTrigger>
-                    <TabsTrigger 
+                    <TabsTrigger
                         value="voados"
                         className="data-[state=active]:bg-white data-[state=active]:text-[#191e3b] data-[state=active]:shadow-none h-[29px] px-2 py-1 rounded-md text-sm font-medium text-[#4b5173]"
                     >
@@ -214,12 +212,10 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                                     </TableRow>
                                 ) : (
                                     filteredTickets?.map((ticket) => {
-                                        const flight = ticket.flights || ticket
-                                        const flightDate =
-                                            flight.departure_date || ticket.flight_date
-                                        const origin = flight.origin || ticket.origin
-                                        const destination = flight.destination || ticket.destination
-                                        const status = flight.status || ticket.status
+                                        const flightDate = ticket.flight_date
+                                        const origin = ticket.origin
+                                        const destination = ticket.destination
+                                        const status = ticket.status
 
                                         const checkinStatus = calculateCheckinStatus(
                                             ticket.airline as any,
@@ -237,7 +233,7 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                                             : { bg: "#f1f3f9", text: "#4b5173", label: "Fechado" }
 
                                         return (
-                                            <TableRow 
+                                            <TableRow
                                                 key={ticket.id}
                                                 className="border-b border-[#e6e9f2] hover:bg-transparent"
                                             >
@@ -250,11 +246,11 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="h-[49px] px-2 py-2">
-                                                    <div 
+                                                    <div
                                                         className="inline-flex items-center justify-center h-[22px] px-2.5 py-0.5 rounded-lg"
                                                         style={{ backgroundColor: statusBadge.bg }}
                                                     >
-                                                        <span 
+                                                        <span
                                                             className="text-xs font-medium leading-4"
                                                             style={{ color: statusBadge.text }}
                                                         >
@@ -284,11 +280,11 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                                                     </span>
                                                 </TableCell>
                                                 <TableCell className="h-[49px] px-2 py-2">
-                                                    <div 
+                                                    <div
                                                         className="inline-flex items-center justify-center h-[22px] px-2.5 py-0.5 rounded-lg"
                                                         style={{ backgroundColor: checkinBadge.bg }}
                                                     >
-                                                        <span 
+                                                        <span
                                                             className="text-xs font-medium leading-4"
                                                             style={{ color: checkinBadge.text }}
                                                         >
@@ -314,9 +310,9 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                                                 </TableCell>
                                                 <TableCell className="h-[49px] px-2 py-2">
                                                     <div className="flex justify-end gap-5">
-                                                        <Button 
-                                                            size="icon" 
-                                                            variant="ghost" 
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
                                                             className="h-4 w-4 p-0 hover:bg-transparent"
                                                             asChild
                                                         >
@@ -324,9 +320,9 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                                                                 <HugeiconsIcon icon={FileDownloadIcon} className="size-4 text-[#2E7D5B]" />
                                                             </Link>
                                                         </Button>
-                                                        <Button 
-                                                            size="icon" 
-                                                            variant="ghost" 
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
                                                             className="h-4 w-4 p-0 hover:bg-transparent"
                                                             asChild
                                                         >

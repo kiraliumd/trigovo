@@ -63,6 +63,25 @@ export async function GET(request: Request) {
                 if (!updateError) {
                     updatedCount++
                     results.push({ flight: flight.flight_number, old: flight.status, new: realTimeStatus.status })
+
+                    // 5. Sync Status to consolidated Tickets
+                    // Find all tickets associated with this flight
+                    const { data: linkedTickets } = await supabase
+                        .from('ticket_flights')
+                        .select('ticket_id')
+                        .eq('flight_id', flight.id)
+
+                    if (linkedTickets && linkedTickets.length > 0) {
+                        const ticketIds = linkedTickets.map(lt => lt.ticket_id)
+                        await supabase
+                            .from('tickets')
+                            .update({
+                                status: realTimeStatus.status,
+                                // Opcional: atualizar dados de exibição se este for o voo principal
+                                // mas por ora o status é o mais crítico
+                            })
+                            .in('id', ticketIds)
+                    }
                 }
             }
         }
