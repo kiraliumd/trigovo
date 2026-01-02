@@ -83,7 +83,7 @@ export function OnboardingFormNew() {
     return (
         <div className="min-h-screen bg-white flex flex-col md:items-center md:justify-center px-4 py-4 sm:py-6 md:py-8">
             <div className="w-full max-w-[766px]">
-                <div className="bg-white border border-[#e6e9f2] rounded-xl overflow-hidden flex flex-col md:flex-row md:h-[581px]">
+                <div className="bg-white border border-border-default rounded-xl overflow-hidden flex flex-col md:flex-row md:h-[581px]">
                     {/* Progress Sidebar */}
                     <ProgressSidebar currentStep="adicionar-informacoes" />
 
@@ -91,26 +91,25 @@ export function OnboardingFormNew() {
                     <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8 w-full md:w-[383px]">
                         <div className="flex flex-col gap-5 sm:gap-6 w-full max-w-[320px]">
                             <div className="flex flex-col gap-4 sm:gap-6">
-                                <h2 className="text-xl sm:text-2xl font-semibold leading-7 sm:leading-8 text-[#191e3b] text-center">
+                                <h2 className="text-xl sm:text-2xl font-semibold leading-7 sm:leading-8 text-text-primary text-center">
                                     Adicionar informações
                                 </h2>
-                                <p className="text-sm font-normal leading-5 text-[#7a7fa3] text-center opacity-70">
+                                <p className="text-sm font-normal leading-5 text-text-tertiary text-center opacity-70">
                                     Precisamos de alguns dados rápidos para configurar sua conta.
                                 </p>
                             </div>
 
                             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 sm:gap-5">
                                 <div className="flex flex-col gap-2 sm:gap-3">
-                                    <Label htmlFor="name" className="text-sm font-medium leading-5 text-[#191e3b]">
+                                    <Label htmlFor="name" className="text-sm font-medium leading-5 text-text-primary">
                                         Agência
                                     </Label>
                                     <Input
                                         id="name"
                                         placeholder="Ex: Agência Viagem Pro"
                                         {...register('name')}
-                                        className={`min-h-[44px] px-4 py-2.5 rounded-md border-[#e6e9f2] bg-white text-base leading-6 text-[#191e3b] placeholder:text-[#7a7fa3] ${
-                                            errors.name ? 'border-red-500' : ''
-                                        }`}
+                                        className={`min-h-[44px] px-4 py-2.5 rounded-md border-border-default bg-white text-base leading-6 text-text-primary placeholder:text-text-tertiary ${errors.name ? 'border-red-500' : ''
+                                            }`}
                                     />
                                     {errors.name && (
                                         <p className="text-xs font-medium text-red-500 mt-1">{errors.name.message}</p>
@@ -118,7 +117,7 @@ export function OnboardingFormNew() {
                                 </div>
 
                                 <div className="flex flex-col gap-2 sm:gap-3">
-                                    <Label htmlFor="cnpj" className="text-sm font-medium leading-5 text-[#191e3b]">
+                                    <Label htmlFor="cnpj" className="text-sm font-medium leading-5 text-text-primary">
                                         CNPJ
                                     </Label>
                                     <Input
@@ -129,9 +128,8 @@ export function OnboardingFormNew() {
                                                 setValue('cnpj', formatCNPJ(e.target.value))
                                             }
                                         })}
-                                        className={`min-h-[44px] px-4 py-2.5 rounded-md border-[#e6e9f2] bg-white text-base leading-6 text-[#191e3b] placeholder:text-[#7a7fa3] ${
-                                            errors.cnpj ? 'border-red-500' : ''
-                                        }`}
+                                        className={`min-h-[44px] px-4 py-2.5 rounded-md border-border-default bg-white text-base leading-6 text-text-primary placeholder:text-text-tertiary ${errors.cnpj ? 'border-red-500' : ''
+                                            }`}
                                     />
                                     {errors.cnpj && (
                                         <p className="text-xs font-medium text-red-500 mt-1">{errors.cnpj.message}</p>
@@ -139,7 +137,7 @@ export function OnboardingFormNew() {
                                 </div>
 
                                 <div className="flex flex-col gap-2 sm:gap-3">
-                                    <Label htmlFor="whatsapp" className="text-sm font-medium leading-5 text-[#191e3b]">
+                                    <Label htmlFor="whatsapp" className="text-sm font-medium leading-5 text-text-primary">
                                         WhatsApp
                                     </Label>
                                     <Input
@@ -152,9 +150,8 @@ export function OnboardingFormNew() {
                                                 setValue('whatsapp', formatPhone(e.target.value))
                                             }
                                         })}
-                                        className={`min-h-[44px] px-4 py-2.5 rounded-md border-[#e6e9f2] bg-white text-base leading-6 text-[#191e3b] placeholder:text-[#7a7fa3] ${
-                                            errors.whatsapp ? 'border-red-500' : ''
-                                        }`}
+                                        className={`min-h-[44px] px-4 py-2.5 rounded-md border-border-default bg-white text-base leading-6 text-text-primary placeholder:text-text-tertiary ${errors.whatsapp ? 'border-red-500' : ''
+                                            }`}
                                     />
                                     {errors.whatsapp && (
                                         <p className="text-xs font-medium text-red-500 mt-1">{errors.whatsapp.message}</p>
@@ -170,19 +167,19 @@ export function OnboardingFormNew() {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full min-h-[44px] px-4 py-3 bg-[#fddb32] rounded-lg flex items-center justify-center text-sm font-medium leading-5 text-[#191e3b] hover:bg-[#fddb32]/90 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-transform mt-2"
+                                    className="w-full min-h-[44px] px-4 py-3 bg-brand-yellow rounded-lg flex items-center justify-center text-sm font-medium leading-5 text-text-primary hover:bg-brand-yellow/90 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-transform mt-2"
                                 >
                                     {isLoading ? 'Carregando...' : 'Continuar'}
                                 </button>
                             </form>
 
-                            <p className="text-xs font-normal leading-5 text-[#7a7fa3] text-center opacity-70 px-2">
+                            <p className="text-xs font-normal leading-5 text-text-tertiary text-center opacity-70 px-2">
                                 <span>Ao criar sua conta, você concorda com os nossos </span>
-                                <Link href="#" className="underline text-[#7a7fa3] hover:no-underline active:opacity-70">
+                                <Link href="#" className="underline text-text-tertiary hover:no-underline active:opacity-70">
                                     Termos
                                 </Link>
                                 <span> e </span>
-                                <Link href="#" className="underline text-[#7a7fa3] hover:no-underline active:opacity-70">
+                                <Link href="#" className="underline text-text-tertiary hover:no-underline active:opacity-70">
                                     Privacidade.
                                 </Link>
                             </p>

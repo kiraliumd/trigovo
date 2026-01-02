@@ -67,21 +67,21 @@ export function AppSidebar({ user }: { user: { name: string; email: string } }) 
     const pathname = usePathname()
 
     return (
-        <Sidebar 
-            collapsible="icon" 
-            variant="sidebar" 
+        <Sidebar
+            collapsible="icon"
+            variant="sidebar"
             className="!bg-white border-r border-[#e6e9f2] [&_[data-sidebar=sidebar]]:!bg-white [&_[data-sidebar=sidebar]]:!text-[#191e3b]"
         >
             <SidebarHeader className="p-2">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton 
-                            size="lg" 
-                            asChild 
-                            className="gap-2 p-2 hover:!bg-transparent data-[state=open]:!bg-transparent"
+                        <SidebarMenuButton
+                            size="lg"
+                            asChild
+                            className="gap-2 p-2 hover:!bg-brand-yellow-light data-[state=open]:!bg-transparent"
                         >
                             <Link href="/dashboard" className="gap-2">
-                                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[#fddb32] shrink-0">
+                                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-brand-yellow shrink-0">
                                     <Image
                                         src="/Trigovo-icon-logo.svg"
                                         alt="Trigovo"
@@ -91,9 +91,9 @@ export function AppSidebar({ user }: { user: { name: string; email: string } }) 
                                         unoptimized
                                     />
                                 </div>
-                                <div className="flex flex-col gap-0 leading-none min-w-0">
-                                    <span className="text-sm font-semibold leading-5 text-[#191e3b]">Trigovo</span>
-                                    <span className="text-xs font-normal leading-4 text-[#191e3b]">Free</span>
+                                <div className="flex flex-col gap-0 leading-none min-w-0 group-data-[collapsible=icon]:hidden">
+                                    <span className="text-sm font-semibold leading-5 text-text-primary">Trigovo</span>
+                                    <span className="text-xs font-normal leading-4 text-text-primary">Free</span>
                                 </div>
                             </Link>
                         </SidebarMenuButton>
@@ -103,7 +103,7 @@ export function AppSidebar({ user }: { user: { name: string; email: string } }) 
             <SidebarContent className="p-2">
                 {/* Seção Plataforma */}
                 <SidebarGroup className="p-0">
-                    <SidebarGroupLabel className="!text-xs !font-normal !leading-4 !text-[#191e3b] !opacity-70 px-2 py-0 h-8 flex items-center">
+                    <SidebarGroupLabel className="!text-xs !font-normal !leading-4 !text-text-primary !opacity-70 px-2 py-0 h-8 flex items-center group-data-[collapsible=icon]:hidden">
                         Plataforma
                     </SidebarGroupLabel>
                     <SidebarMenu className="gap-1">
@@ -117,15 +117,15 @@ export function AppSidebar({ user }: { user: { name: string; email: string } }) 
                                         tooltip={item.title}
                                         className={cn(
                                             "h-8 gap-2 pl-2 pr-8 py-2 rounded-md",
-                                            isActive 
-                                                ? "!bg-[#fff7d6] !text-[#191e3b] font-medium hover:!bg-[#fff7d6] data-[active=true]:!bg-[#fff7d6]" 
-                                                : "!text-[#191e3b] font-normal hover:!bg-transparent"
+                                            isActive
+                                                ? "!bg-brand-yellow-light !text-text-primary font-medium hover:!bg-brand-yellow-light data-[active=true]:!bg-brand-yellow-light"
+                                                : "!text-text-primary font-normal hover:!bg-brand-yellow-light"
                                         )}
                                     >
                                         <Link href={item.url} className="flex items-center gap-2">
-                                            <HugeiconsIcon icon={item.icon} className="size-4 shrink-0 text-[#191e3b]" />
+                                            <HugeiconsIcon icon={item.icon} className="size-4 shrink-0 text-text-primary" />
                                             <span className={cn(
-                                                "text-sm leading-5",
+                                                "text-sm leading-5 group-data-[collapsible=icon]:hidden",
                                                 isActive ? "font-medium" : "font-normal"
                                             )}>
                                                 {item.title}
@@ -140,7 +140,7 @@ export function AppSidebar({ user }: { user: { name: string; email: string } }) 
 
                 {/* Seção Suporte */}
                 <SidebarGroup className="p-0">
-                    <SidebarGroupLabel className="!text-xs !font-normal !leading-4 !text-[#191e3b] !opacity-70 px-2 py-0 h-8 flex items-center">
+                    <SidebarGroupLabel className="!text-xs !font-normal !leading-4 !text-text-primary !opacity-70 px-2 py-0 h-8 flex items-center group-data-[collapsible=icon]:hidden">
                         Suporte
                     </SidebarGroupLabel>
                     <SidebarMenu className="gap-1">
@@ -154,14 +154,14 @@ export function AppSidebar({ user }: { user: { name: string; email: string } }) 
                                         tooltip={item.title}
                                         className={cn(
                                             "h-8 gap-2 pl-2 pr-8 py-2 rounded-md",
-                                            isActive 
-                                                ? "!bg-[#fff7d6] !text-[#191e3b] font-medium hover:!bg-[#fff7d6] data-[active=true]:!bg-[#fff7d6]" 
-                                                : "!text-[#191e3b] font-normal hover:!bg-transparent"
+                                            isActive
+                                                ? "!bg-brand-yellow-light !text-text-primary font-medium hover:!bg-brand-yellow-light data-[active=true]:!bg-brand-yellow-light"
+                                                : "!text-text-primary font-normal hover:!bg-brand-yellow-light"
                                         )}
                                     >
                                         <Link href={item.url} className="flex items-center gap-2">
-                                            <HugeiconsIcon icon={item.icon} className="size-4 shrink-0 text-[#191e3b]" />
-                                            <span className="text-sm font-normal leading-5 text-[#191e3b]">
+                                            <HugeiconsIcon icon={item.icon} className="size-4 shrink-0 text-text-primary" />
+                                            <span className="text-sm font-normal leading-5 text-text-primary group-data-[collapsible=icon]:hidden">
                                                 {item.title}
                                             </span>
                                         </Link>

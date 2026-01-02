@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { HugeiconsIcon } from '@hugeicons/react'
 import { PlaneIcon } from '@hugeicons/core-free-icons'
+import { cn } from "@/lib/utils"
 
 interface AirlineIconProps {
     airline: string
@@ -11,42 +12,27 @@ interface AirlineIconProps {
 
 export function AirlineIcon({ airline, className = "" }: AirlineIconProps) {
     const airlineUpper = airline?.toUpperCase() || ""
-    
-    // Retorna o caminho do SVG e cor de fundo conforme Figma
-    const getAirlineStyle = () => {
-        switch (airlineUpper) {
-            case "LATAM":
-                return {
-                    bg: "#2a0088",
-                    svg: "/Property 1=Latam.svg"
-                }
-            case "GOL":
-                return {
-                    bg: "#ff7020",
-                    svg: "/Property 1=Gol.svg"
-                }
-            case "AZUL":
-                return {
-                    bg: "#041e42",
-                    svg: "/Property 1=Azul.svg"
-                }
-            default:
-                return {
-                    bg: "#f1f3f9",
-                    svg: null
-                }
-        }
+
+    // Mapeamento de SVGs e classes de fundo conforme Tailwind global
+    const airlineConfig: Record<string, { bg: string; svg: string | null }> = {
+        "LATAM": { bg: "bg-airline-latam", svg: "/Property 1=Latam.svg" },
+        "GOL": { bg: "bg-airline-gol", svg: "/Property 1=Gol.svg" },
+        "AZUL": { bg: "bg-airline-azul", svg: "/Property 1=Azul.svg" }
     }
 
-    const style = getAirlineStyle()
+    const config = airlineConfig[airlineUpper] || { bg: "bg-bg-secondary", svg: null }
 
     return (
-        <div 
-            className={`size-4 rounded-[2px] flex items-center justify-center shrink-0 overflow-hidden ${className}`}
+        <div
+            className={cn(
+                "size-4 rounded-[2px] flex items-center justify-center shrink-0 overflow-hidden",
+                config.bg,
+                className
+            )}
         >
-            {style.svg ? (
+            {config.svg ? (
                 <Image
-                    src={style.svg}
+                    src={config.svg}
                     alt={airline}
                     width={16}
                     height={16}
@@ -54,12 +40,7 @@ export function AirlineIcon({ airline, className = "" }: AirlineIconProps) {
                     unoptimized
                 />
             ) : (
-                <div 
-                    className="size-4 rounded-[2px] flex items-center justify-center"
-                    style={{ backgroundColor: style.bg }}
-                >
-                    <HugeiconsIcon icon={PlaneIcon} className="size-3 text-[#191e3b]" />
-                </div>
+                <HugeiconsIcon icon={PlaneIcon} className="size-3 text-text-primary" />
             )}
         </div>
     )

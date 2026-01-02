@@ -42,11 +42,37 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Tokens Customizados do Figma */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-dark: var(--text-dark);
+  --color-text-placeholder: var(--text-placeholder);
+
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-yellow-light: var(--brand-yellow-light);
+  --color-brand-yellow-lighter: var(--brand-yellow-lighter);
+  --color-brand-blue: var(--brand-blue);
+
+  --color-status-error-bg: var(--status-error-bg);
+  --color-status-error-text: var(--status-error-text);
+  --color-status-warning-bg: var(--status-warning-bg);
+  --color-status-warning-text: var(--status-warning-text);
+  --color-status-success-bg: var(--status-success-bg);
+  --color-status-success-text: var(--status-success-text);
+
+  --color-border-default: var(--border-default);
+  --color-bg-secondary: var(--bg-secondary);
+  /* Tokens de Companhias Aéreas */
+  --color-airline-latam: var(--airline-latam);
+  --color-airline-gol: var(--airline-gol);
+  --color-airline-azul: var(--airline-azul);
 }
 
 :root {
   /* USE EXATAMENTE O CÓDIGO FORNECIDO PELO USUÁRIO ABAIXO */
-  
+
   /* Design Tokens - Cores Principais */
   --background: oklch(0.97 0.007 234);
   --foreground: oklch(0.21 0.036 256);
@@ -54,8 +80,8 @@
   --card-foreground: oklch(0.21 0.036 256);
   --popover: oklch(1 0.000 0);
   --popover-foreground: oklch(0.21 0.036 256);
-  --primary: oklch(0.27 0.035 249);
-  --primary-foreground: oklch(1 0 0);
+  --primary: #fddb32;
+  --primary-foreground: #191e3b;
   --secondary: oklch(0.55 0.040 247 / 0.075);
   --secondary-foreground: oklch(0.21 0.036 256);
   --muted: oklch(0.92 0.014 248);
@@ -66,15 +92,15 @@
   --destructive-foreground: oklch(0.577 0.245 27.325);
   --border: oklch(0.27 0.035 249 / 0.125);
   --input: oklch(0.27 0.035 249 / 0.125);
-  --ring: oklch(0.27 0.035 249);
-  
+  --ring: #fddb32;
+
   /* Design Tokens - Cores de Gráficos */
   --chart-1: oklch(0.69 0.161 40);
   --chart-2: oklch(0.71 0.035 248);
   --chart-3: oklch(0.627 0.265 303.9);
   --chart-4: oklch(0.852 0.199 91.936);
   --chart-5: oklch(0.685 0.169 237.323);
-  
+
   /* Design Tokens - Sidebar */
   --sidebar: oklch(0.21 0.036 256);
   --sidebar-foreground: oklch(1 0 0);
@@ -84,25 +110,29 @@
   --sidebar-accent-foreground: oklch(1 0 0);
   --sidebar-border: oklch(1 0 0 / 0.125);
   --sidebar-ring: oklch(0.44 0.037 250);
-  
+
   /* Design Tokens - Espaçamento e Layout */
-  --radius: 0.5rem; /* 8px - Border radius padrão */
+  --radius: 0.5rem;
+  /* 8px - Border radius padrão */
   --sidebar-width: 255px;
   --sidebar-width-mobile: 20rem;
-  
+
   /* Design Tokens - Cores Customizadas do Figma */
   /* Cores de Texto */
   --text-primary: #191e3b;
   --text-secondary: #4b5173;
   --text-tertiary: #7a7fa3;
   --text-dark: #0a0a0a;
-  
+
   /* Cores de Brand */
   --brand-yellow: #fddb32;
   --brand-yellow-light: #fff7d6;
   --brand-yellow-lighter: #fff9e3;
   --brand-blue: #546dfa;
-  
+
+  /* Muted / Placeholder */
+  --text-placeholder: #737373;
+
   /* Cores de Status */
   --status-error-bg: #fdecec;
   --status-error-text: #9b2c2c;
@@ -110,18 +140,23 @@
   --status-warning-text: #8a6a1f;
   --status-success-bg: #eaf7f0;
   --status-success-text: #2e7d5b;
-  
+
   /* Cores de Borda e Fundo */
   --border-default: #e6e9f2;
   --bg-secondary: #f1f3f9;
-  
-  /* Design Tokens - Tipografia (do Figma) */
-  /* Font Family: Inter (definida em layout.tsx) */
-  /* Text-xs: 12px (size/xs do Figma) */
-  /* Line Height: 16px (leading/4 do Figma) */
-  /* Font Weight Normal: 400 (weight/normal do Figma) */
-  /* Letter Spacing: 0px (tracking/normal do Figma) */
+
+  /* Cores de Companhias Aéreas */
+  --airline-latam: #2a0088;
+  --airline-gol: #ff7020;
+  --airline-azul: #041e42;
 }
+
+/* Design Tokens - Tipografia (do Figma) */
+/* Font Family: Inter (definida em layout.tsx) */
+/* Text-xs: 12px (size/xs do Figma) */
+/* Line Height: 16px (leading/4 do Figma) */
+/* Font Weight Normal: 400 (weight/normal do Figma) */
+/* Letter Spacing: 0px (tracking/normal do Figma) */
 
 .dark {
   --background: oklch(0.145 0 0);

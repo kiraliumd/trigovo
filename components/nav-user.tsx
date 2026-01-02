@@ -54,18 +54,18 @@ export function NavUser({
                 <SidebarMenuItem>
                     <SidebarMenuButton
                         size="lg"
-                        className="gap-2 p-2 hover:bg-transparent data-[state=open]:bg-transparent"
+                        className="gap-2 p-2 hover:!bg-[#fff7d6] data-[state=open]:bg-transparent"
                     >
                         <UserAvatar name={user.name} className="h-8 w-8 rounded-lg shrink-0" />
-                        <div className="flex flex-col flex-1 text-left leading-tight min-w-0">
-                            <span className="text-sm font-semibold leading-5 text-[#191e3b] truncate">
+                        <div className="flex flex-col flex-1 text-left leading-tight min-w-0 group-data-[collapsible=icon]:hidden">
+                            <span className="text-sm font-semibold leading-5 text-text-primary truncate">
                                 {user.name}
                             </span>
-                            <span className="text-xs font-normal leading-4 text-[#191e3b] truncate">
+                            <span className="text-xs font-normal leading-4 text-text-primary truncate">
                                 {user.email}
                             </span>
                         </div>
-                        <HugeiconsIcon icon={UnfoldMoreIcon} className="ml-auto size-4 shrink-0 text-[#191e3b]" />
+                        <HugeiconsIcon icon={UnfoldMoreIcon} className="ml-auto size-4 shrink-0 text-text-primary group-data-[collapsible=icon]:hidden" />
                     </SidebarMenuButton>
                 </SidebarMenuItem>
             </SidebarMenu>
@@ -79,18 +79,18 @@ export function NavUser({
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton
                             size="lg"
-                            className="gap-2 p-2 hover:bg-transparent data-[state=open]:bg-transparent"
+                            className="gap-2 p-2 hover:!bg-[#fff7d6] data-[state=open]:bg-transparent"
                         >
                             <UserAvatar name={user.name} className="h-8 w-8 rounded-lg shrink-0" />
-                            <div className="flex flex-col flex-1 text-left leading-tight min-w-0">
-                                <span className="text-sm font-semibold leading-5 text-[#191e3b] truncate">
+                            <div className="flex flex-col flex-1 text-left leading-tight min-w-0 group-data-[collapsible=icon]:hidden">
+                                <span className="text-sm font-semibold leading-5 text-text-primary truncate">
                                     {user.name}
                                 </span>
-                                <span className="text-xs font-normal leading-4 text-[#191e3b] truncate">
+                                <span className="text-xs font-normal leading-4 text-text-primary truncate">
                                     {user.email}
                                 </span>
                             </div>
-                            <HugeiconsIcon icon={UnfoldMoreIcon} className="ml-auto size-4 shrink-0 text-[#191e3b]" />
+                            <HugeiconsIcon icon={UnfoldMoreIcon} className="ml-auto size-4 shrink-0 text-text-primary group-data-[collapsible=icon]:hidden" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent

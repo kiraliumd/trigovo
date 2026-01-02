@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -92,22 +93,22 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
     function getStatusBadge(status: string) {
         switch (status) {
             case "Cancelado":
-                return { bg: "#fdecec", text: "#9b2c2c", label: "Cancelado" }
+                return { bg: "bg-status-error-bg", text: "text-status-error-text", label: "Cancelado" }
             case "Atrasado":
-                return { bg: "#fff2d6", text: "#8a6a1f", label: "Atrasado" }
+                return { bg: "bg-status-warning-bg", text: "text-status-warning-text", label: "Atrasado" }
             case "Confirmado":
-                return { bg: "#eaf7f0", text: "#2e7d5b", label: "Confirmado" }
+                return { bg: "bg-status-success-bg", text: "text-status-success-text", label: "Confirmado" }
             case "Completo":
-                return { bg: "#f1f3f9", text: "#4b5173", label: "Completo" }
+                return { bg: "bg-bg-secondary", text: "text-text-secondary", label: "Completo" }
             default:
-                return { bg: "#f1f3f9", text: "#4b5173", label: status }
+                return { bg: "bg-bg-secondary", text: "text-text-secondary", label: status }
         }
     }
 
     if (!mounted) {
         return (
             <div className="space-y-4">
-                <div className="bg-[#f1f3f9] h-9 p-[3px] rounded-lg flex gap-1">
+                <div className="bg-bg-secondary h-9 p-[3px] rounded-lg flex gap-1">
                     <div className="h-[29px] px-2 py-1 rounded-md bg-white text-sm font-medium">Todos</div>
                 </div>
             </div>
@@ -117,28 +118,28 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
     return (
         <div className="space-y-4">
             <Tabs defaultValue="todos" value={statusTab} onValueChange={setStatusTab}>
-                <TabsList className="bg-[#f1f3f9] h-9 p-[3px] rounded-lg">
+                <TabsList className="bg-bg-secondary h-9 p-[3px] rounded-lg">
                     <TabsTrigger
                         value="todos"
-                        className="data-[state=active]:bg-white data-[state=active]:text-[#191e3b] data-[state=active]:shadow-none h-[29px] px-2 py-1 rounded-md text-sm font-medium"
+                        className="data-[state=active]:bg-white data-[state=active]:text-text-primary data-[state=active]:shadow-none h-[29px] px-2 py-1 rounded-md text-sm font-medium"
                     >
                         Todos
                     </TabsTrigger>
                     <TabsTrigger
                         value="checkin-aberto"
-                        className="data-[state=active]:bg-white data-[state=active]:text-[#191e3b] data-[state=active]:shadow-none h-[29px] px-2 py-1 rounded-md text-sm font-medium text-[#4b5173]"
+                        className="data-[state=active]:bg-white data-[state=active]:text-text-primary data-[state=active]:shadow-none h-[29px] px-2 py-1 rounded-md text-sm font-medium text-text-secondary"
                     >
                         Check-in Aberto
                     </TabsTrigger>
                     <TabsTrigger
                         value="checkin-fechado"
-                        className="data-[state=active]:bg-white data-[state=active]:text-[#191e3b] data-[state=active]:shadow-none h-[29px] px-2 py-1 rounded-md text-sm font-medium text-[#4b5173]"
+                        className="data-[state=active]:bg-white data-[state=active]:text-text-primary data-[state=active]:shadow-none h-[29px] px-2 py-1 rounded-md text-sm font-medium text-text-secondary"
                     >
                         Check-in Fechado
                     </TabsTrigger>
                     <TabsTrigger
                         value="voados"
-                        className="data-[state=active]:bg-white data-[state=active]:text-[#191e3b] data-[state=active]:shadow-none h-[29px] px-2 py-1 rounded-md text-sm font-medium text-[#4b5173]"
+                        className="data-[state=active]:bg-white data-[state=active]:text-text-primary data-[state=active]:shadow-none h-[29px] px-2 py-1 rounded-md text-sm font-medium text-text-secondary"
                     >
                         Voados
                     </TabsTrigger>
@@ -150,18 +151,18 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                         <div className="relative flex-1 max-w-[384px]">
                             <Input
                                 placeholder="Busca por passageiro ou localizador..."
-                                className="h-9 px-3 py-1 rounded-md border-[#e6e9f2] bg-white text-sm leading-6 text-[#737373]"
+                                className="h-9 px-3 py-1 rounded-md border-border-default bg-white text-sm leading-6 text-text-placeholder"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
                         <div className="flex items-center gap-2">
-                            <HugeiconsIcon icon={FilterIcon} className="size-4 text-[#191e3b]" />
+                            <HugeiconsIcon icon={FilterIcon} className="size-4 text-text-primary" />
                             <Select
                                 value={airlineFilter}
                                 onValueChange={setAirlineFilter}
                             >
-                                <SelectTrigger className="w-[153px] h-9 px-3 py-2 rounded-md border-[#e6e9f2] bg-white">
+                                <SelectTrigger className="w-[153px] h-9 px-3 py-2 rounded-md border-border-default bg-white">
                                     <SelectValue placeholder="Todas" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -175,38 +176,38 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                     </div>
 
                     {/* Tabela */}
-                    <div className="bg-white border border-[#e6e9f2] rounded-md">
+                    <div className="bg-white border border-border-default rounded-md">
                         <Table>
                             <TableHeader>
-                                <TableRow className="border-b border-[#e6e9f2] hover:bg-transparent">
+                                <TableRow className="border-b border-border-default hover:bg-transparent">
                                     <TableHead className="h-10 pl-2 pr-2 py-0">
-                                        <span className="text-sm font-medium leading-5 text-[#0a0a0a]">Empresa</span>
+                                        <span className="text-sm font-medium leading-5 text-text-dark">Empresa</span>
                                     </TableHead>
                                     <TableHead className="h-10 px-2 py-0">
-                                        <span className="text-sm font-medium leading-5 text-[#0a0a0a]">Status</span>
+                                        <span className="text-sm font-medium leading-5 text-text-dark">Status</span>
                                     </TableHead>
                                     <TableHead className="h-10 px-2 py-0">
-                                        <span className="text-sm font-medium leading-5 text-[#0a0a0a]">Nome</span>
+                                        <span className="text-sm font-medium leading-5 text-text-dark">Nome</span>
                                     </TableHead>
                                     <TableHead className="h-10 px-2 py-0">
-                                        <span className="text-sm font-medium leading-5 text-[#0a0a0a]">Localizador</span>
+                                        <span className="text-sm font-medium leading-5 text-text-dark">Localizador</span>
                                     </TableHead>
                                     <TableHead className="h-10 px-2 py-0">
-                                        <span className="text-sm font-medium leading-5 text-[#0a0a0a]">Sobrenome</span>
+                                        <span className="text-sm font-medium leading-5 text-text-dark">Sobrenome</span>
                                     </TableHead>
                                     <TableHead className="h-10 px-2 py-0">
-                                        <span className="text-sm font-medium leading-5 text-[#0a0a0a]">Check-in</span>
+                                        <span className="text-sm font-medium leading-5 text-text-dark">Check-in</span>
                                     </TableHead>
                                     <TableHead className="h-10 px-2 py-0">
-                                        <span className="text-sm font-medium leading-5 text-[#0a0a0a]">Rota</span>
+                                        <span className="text-sm font-medium leading-5 text-text-dark">Rota</span>
                                     </TableHead>
                                     <TableHead className="h-10 px-2 py-0">
-                                        <span className="text-sm font-medium leading-5 text-[#0a0a0a]">Embarque</span>
+                                        <span className="text-sm font-medium leading-5 text-text-dark">Embarque</span>
                                     </TableHead>
                                     <TableHead className="h-10 px-2 py-0 text-right">
                                         <div className="flex items-center justify-end gap-1">
-                                            <span className="text-sm font-medium leading-5 text-[#0a0a0a]">Ações</span>
-                                            <HugeiconsIcon icon={HelpCircleIcon} className="size-3 text-[#191e3b]" />
+                                            <span className="text-sm font-medium leading-5 text-text-dark">Ações</span>
+                                            <HugeiconsIcon icon={HelpCircleIcon} className="size-3 text-text-primary" />
                                         </div>
                                     </TableHead>
                                 </TableRow>
@@ -249,30 +250,34 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
 
                                         const statusBadge = getStatusBadge(status)
                                         const checkinBadge = checkinStatus.isCheckinOpen
-                                            ? { bg: "#eaf7f0", text: "#2e7d5b", label: "Aberto" }
-                                            : { bg: "#f1f3f9", text: "#4b5173", label: "Fechado" }
+                                            ? { bg: "bg-status-success-bg", text: "text-status-success-text", label: "Aberto" }
+                                            : { bg: "bg-bg-secondary", text: "text-text-secondary", label: "Fechado" }
 
                                         return (
                                             <TableRow
                                                 key={ticket.id}
-                                                className="border-b border-[#e6e9f2] hover:bg-transparent"
+                                                className="border-b border-border-default hover:bg-transparent"
                                             >
                                                 <TableCell className="h-[49px] pl-2 pr-2 py-2">
                                                     <div className="flex gap-1.25 items-center">
                                                         <AirlineIcon airline={ticket.airline} />
-                                                        <span className="text-sm font-normal leading-5 text-[#0a0a0a]">
+                                                        <span className="text-sm font-normal leading-5 text-text-dark">
                                                             {ticket.airline}
                                                         </span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="h-[49px] px-2 py-2">
                                                     <div
-                                                        className="inline-flex items-center justify-center h-[22px] px-2.5 py-0.5 rounded-lg"
-                                                        style={{ backgroundColor: statusBadge.bg }}
+                                                        className={cn(
+                                                            "inline-flex items-center justify-center h-[22px] px-2.5 py-0.5 rounded-lg",
+                                                            statusBadge.bg
+                                                        )}
                                                     >
                                                         <span
-                                                            className="text-xs font-medium leading-4"
-                                                            style={{ color: statusBadge.text }}
+                                                            className={cn(
+                                                                "text-xs font-medium leading-4",
+                                                                statusBadge.text
+                                                            )}
                                                         >
                                                             {statusBadge.label}
                                                         </span>
@@ -280,7 +285,7 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                                                 </TableCell>
                                                 <TableCell className="h-[49px] px-2 py-2">
                                                     <div className="flex gap-2.5 items-center">
-                                                        <span className="flex-1 text-sm font-normal leading-5 text-[#0a0a0a] truncate">
+                                                        <span className="flex-1 text-sm font-normal leading-5 text-text-dark truncate">
                                                             {ticket.passenger_name || "Passageiro (editar)"}
                                                         </span>
                                                         <EditPassengerNameDialog
@@ -290,23 +295,27 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="h-[49px] px-2 py-2">
-                                                    <span className="text-sm font-normal leading-5 text-[#0a0a0a]">
+                                                    <span className="text-sm font-normal leading-5 text-text-dark">
                                                         {ticket.pnr}
                                                     </span>
                                                 </TableCell>
                                                 <TableCell className="h-[49px] px-2 py-2">
-                                                    <span className="text-sm font-normal leading-5 text-[#0a0a0a]">
+                                                    <span className="text-sm font-normal leading-5 text-text-dark">
                                                         {ticket.passenger_lastname?.toUpperCase() || ""}
                                                     </span>
                                                 </TableCell>
                                                 <TableCell className="h-[49px] px-2 py-2">
                                                     <div
-                                                        className="inline-flex items-center justify-center h-[22px] px-2.5 py-0.5 rounded-lg"
-                                                        style={{ backgroundColor: checkinBadge.bg }}
+                                                        className={cn(
+                                                            "inline-flex items-center justify-center h-[22px] px-2.5 py-0.5 rounded-lg",
+                                                            checkinBadge.bg
+                                                        )}
                                                     >
                                                         <span
-                                                            className="text-xs font-medium leading-4"
-                                                            style={{ color: checkinBadge.text }}
+                                                            className={cn(
+                                                                "text-xs font-medium leading-4",
+                                                                checkinBadge.text
+                                                            )}
                                                         >
                                                             {checkinBadge.label}
                                                         </span>
@@ -314,21 +323,21 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                                                 </TableCell>
                                                 <TableCell className="h-[49px] px-2 py-2">
                                                     <div className="flex items-center justify-between">
-                                                        <span className="text-sm font-normal leading-5 text-[#0a0a0a]">
+                                                        <span className="text-sm font-normal leading-5 text-text-dark">
                                                             {origin || "N/A"}
                                                         </span>
-                                                        <HugeiconsIcon icon={Airplane02Icon} className="size-4 text-[#fddb32]" />
-                                                        <span className="text-sm font-normal leading-5 text-[#0a0a0a]">
+                                                        <HugeiconsIcon icon={Airplane02Icon} className="size-4 text-brand-yellow" />
+                                                        <span className="text-sm font-normal leading-5 text-text-dark">
                                                             {destination || "N/A"}
                                                         </span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="h-[49px] px-2 py-2">
-                                                    <span className="text-sm font-normal leading-5 text-[#0a0a0a]">
+                                                    <span className="text-sm font-normal leading-5 text-text-dark">
                                                         {format(new Date(flightDate), "dd/MM/yyyy")}
                                                     </span>
                                                 </TableCell>
-                                                <TableCell className="h-[49px] px-2 py-2">
+                                                <TableCell className="h-[49px] px-2 py-2 text-right">
                                                     <div className="flex justify-end gap-5">
                                                         <Button
                                                             size="icon"
@@ -337,7 +346,7 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                                                             asChild
                                                         >
                                                             <Link href={`/dashboard/flights/${ticket.id}/boarding-pass`}>
-                                                                <HugeiconsIcon icon={FileDownloadIcon} className="size-4 text-[#2E7D5B]" />
+                                                                <HugeiconsIcon icon={FileDownloadIcon} className="size-4 text-status-success-text" />
                                                             </Link>
                                                         </Button>
                                                         <Button
@@ -351,7 +360,7 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                             >
-                                                                <HugeiconsIcon icon={LinkSquare01Icon} className="size-4 text-[#546dfa]" />
+                                                                <HugeiconsIcon icon={LinkSquare01Icon} className="size-4 text-brand-blue" />
                                                             </a>
                                                         </Button>
                                                         <DeleteFlightButton ticketId={ticket.id} />
