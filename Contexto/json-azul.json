@@ -1,0 +1,368 @@
+{
+    "data": {
+        "recordLocator": "FL5TQW",
+        "nickname": "",
+        "numericRecordLocator": "112328043310",
+        "otherAirlineLocator": null,
+        "systemCode": null,
+        "tripType": "OneWay",
+        "region": "Domestic",
+        "currencyCode": "BRL",
+        "sourceOrganizationCode": "B2C",
+        "balanceDue": 0,
+        "reaccommodation": {
+            "susceptible": false,
+            "totalVoucher": 0,
+            "currencyCode": "BRL",
+            "voucherRedirect": null,
+            "redirectLinks": []
+        },
+        "info": {
+            "status": "Confirmed"
+        },
+        "hold": null,
+        "journeys": [
+            {
+                "lastSegmentStarted": false,
+                "transportDiscountProposal": null,
+                "menu": null,
+                "action": {
+                    "name": "BoardingPass",
+                    "reason": null,
+                    "payment": {
+                        "type": "None",
+                        "status": "None"
+                    }
+                },
+                "reaccommodation": null,
+                "anticipation": {
+                    "available": false,
+                    "reason": "A antecipação só é permitida dentro do período de 6 horas antes do horário do trecho que quer antecipar."
+                },
+                "checkin": {
+                    "apis": false,
+                    "available": true,
+                    "evus": false,
+                    "countdown": null,
+                    "reason": null,
+                    "standBy": false,
+                    "visa": false,
+                    "tsa": false,
+                    "printingDesk": false
+                },
+                "retroClaim": {
+                    "available": false,
+                    "countdown": null,
+                    "reason": "Opa! A journey ainda não foi voada."
+                },
+                "baggage": {
+                    "available": true,
+                    "reason": null,
+                    "trackable": false
+                },
+                "identifier": {
+                    "arrivalStation": "REC",
+                    "arrivalCountry": "BR",
+                    "carrierCode": "AD",
+                    "fareBasis": "W00TAD",
+                    "classOfService": "W",
+                    "productClass": {
+                        "code": "TE",
+                        "category": "Economy",
+                        "name": "Azul"
+                    },
+                    "connections": null,
+                    "departureStation": "SLZ",
+                    "departureCountry": "BR",
+                    "flightNumber": "4017",
+                    "sta": "2025-11-27T17:30:00",
+                    "std": "2025-11-27T15:35:00",
+                    "staUtc": "2025-11-27T20:30:00Z",
+                    "stdUtc": "2025-11-27T18:35:00Z"
+                },
+                "externalIdentifier": null,
+                "journeyKey": "QUR_NDAxN34gfn5TTFp_MTEvMjcvMjAyNSAxNTozNX5SRUN_MTEvMjcvMjAyNSAxNzozMH5_",
+                "passengerJourney": [
+                    {
+                        "checkin": {
+                            "available": true,
+                            "checkedIn": true,
+                            "partialCheckin": false,
+                            "reason": null
+                        },
+                        "passengerKey": "MCFBRFQ-",
+                        "isAdultWithUnderage": false,
+                        "bag": {
+                            "ssrCode": null,
+                            "count": 0,
+                            "name": null,
+                            "amount": 0,
+                            "currencyCode": null,
+                            "dispatch": false
+                        },
+                        "benefits": {
+                            "bag": {
+                                "included": 0
+                            },
+                            "seat": {
+                                "includedDomesticEa": false
+                            }
+                        },
+                        "restrictions": []
+                    }
+                ],
+                "mixedCabin": false,
+                "segments": [
+                    {
+                        "isReaccommodation": false,
+                        "checkin": {
+                            "available": false,
+                            "reason": "Nenhum segmento com reacomodação disponível para efetuar o checkin.",
+                            "printingDesk": false
+                        },
+                        "cabin": null,
+                        "boardingTime": "2025-11-27T14:55:00",
+                        "endBoardingTime": "2025-11-27T15:15:00",
+                        "identifier": {
+                            "arrivalStation": "REC",
+                            "carrierCode": "AD",
+                            "departureStation": "SLZ",
+                            "flightNumber": "4017",
+                            "sta": "2025-11-27T17:30:00",
+                            "std": "2025-11-27T15:35:00",
+                            "terminal": null,
+                            "gate": null
+                        },
+                        "externalIdentifier": null,
+                        "legs": [
+                            {
+                                "legKey": "NjM4OTk4NTQ1MDAwMDAwMDAwIUFEITQwMTchICFTTFohUkVDITEyNjI3NjI5",
+                                "identifier": {
+                                    "arrivalStation": "REC",
+                                    "carrierCode": null,
+                                    "departureStation": "SLZ",
+                                    "sta": "2025-11-27T17:30:00",
+                                    "std": "2025-11-27T15:35:00"
+                                }
+                            }
+                        ],
+                        "passengerSegment": [
+                            {
+                                "passengerKey": "MCFBRFQ-",
+                                "checkin": {
+                                    "available": false,
+                                    "checkedIn": false,
+                                    "reason": "Nenhum segmento com reacomodação disponível para efetuar o checkin."
+                                },
+                                "seat": {
+                                    "seatKey": "QUQhNDAxNyEgITYzODk5ODU0NTAwMDAwMDAwMCFTTFohUkVDITE5QSFZ",
+                                    "designator": "19A",
+                                    "liftStatus": "CheckedIn",
+                                    "type": "Assento Padrão",
+                                    "feeCode": null,
+                                    "amount": 0,
+                                    "currencyCode": null,
+                                    "rules": {
+                                        "canAssign": true,
+                                        "restricted": false,
+                                        "reason": null,
+                                        "redeemedPoints": false
+                                    }
+                                },
+                                "ssrs": [],
+                                "restrictions": [
+                                    "3019"
+                                ]
+                            }
+                        ],
+                        "segmentKey": "QUR_NDAxN34gfn5TTFp_MTEvMjcvMjAyNSAxNTozNX5SRUN_MTEvMjcvMjAyNSAxNzozMH5_",
+                        "stops": null,
+                        "equipment": {
+                            "name": "Airbus A320",
+                            "suffix": "",
+                            "type": "320"
+                        }
+                    }
+                ],
+                "restrictions": [
+                    "1006",
+                    "8002"
+                ],
+                "businessUpgrade": {
+                    "benefits": {
+                        "available": false,
+                        "reason": null
+                    }
+                }
+            }
+        ],
+        "passengers": [
+            {
+                "name": {
+                    "first": "Nivanilce",
+                    "last": "Soares",
+                    "middle": null
+                },
+                "passengerKey": "MCFBRFQ-",
+                "passengerAlternateKey": "MzA5ODM0MDM5",
+                "type": "ADT",
+                "info": {
+                    "gender": "Female",
+                    "residentCountry": "BR",
+                    "nationality": "BR",
+                    "dateOfBirth": "1977-06-09T00:00:00"
+                },
+                "infant": null,
+                "program": null,
+                "bagCount": 0,
+                "seatAssignment": "Complete",
+                "requiredUnderageSsr": false,
+                "companionPass": false
+            }
+        ],
+        "contacts": [
+            {
+                "email": "excelenciaturismo.3@gmail.com",
+                "type": "Other"
+            },
+            {
+                "email": "vitorlemesclube@gmail.com",
+                "type": "Primary"
+            }
+        ],
+        "payments": [
+            {
+                "amount": 110.53,
+                "authorizationStatus": "Approved",
+                "code": "XX",
+                "currencyCode": "BRL",
+                "paymentKey": "MjU2NjUyNDQyITEhWFghMjE1Nzk1NTM5",
+                "accountNumber": null,
+                "installments": 0,
+                "url": null
+            },
+            {
+                "amount": 46.36,
+                "authorizationStatus": "Approved",
+                "code": "MY",
+                "currencyCode": "BRL",
+                "paymentKey": "MjU2NjUyNDQzITIhTVkhMjE1Nzk1NTM5",
+                "accountNumber": null,
+                "installments": 0,
+                "url": null
+            },
+            {
+                "amount": -110.53,
+                "authorizationStatus": "Approved",
+                "code": "XX",
+                "currencyCode": "BRL",
+                "paymentKey": "MjU2NjUyNjAyITMhWFghMjE1Nzk1NTM5",
+                "accountNumber": null,
+                "installments": 0,
+                "url": null
+            },
+            {
+                "amount": 110.53,
+                "authorizationStatus": "Approved",
+                "code": "XX",
+                "currencyCode": "BRL",
+                "paymentKey": "MjU2NjUyNjA5ITQhWFghMjE1Nzk1NTM5",
+                "accountNumber": null,
+                "installments": 0,
+                "url": null
+            }
+        ],
+        "rules": {
+            "underpaid": false,
+            "assignSeats": true,
+            "purchaseBags": true,
+            "linkable": true,
+            "pointsRedeemed": true,
+            "payPalEnabled": false,
+            "locked": false,
+            "canAddPayment": true,
+            "canAddInsurance": {
+                "available": true,
+                "reason": null
+            },
+            "anticipation": {
+                "available": false,
+                "reason": "Ops, infelizmente não é possível realizar a antecipação do voo para essa reserva."
+            },
+            "checkin": {
+                "available": true,
+                "reason": null
+            },
+            "view": {
+                "available": true,
+                "reason": null
+            },
+            "specialAssistance": {
+                "available": false,
+                "reason": "A partir de 72 horas antes do voo, este serviço não fica disponível neste canal. No entanto, você ainda pode solicitar o serviço diretamente no balcão do aeroporto."
+            },
+            "businessUpgrade": {
+                "points": {
+                    "available": true,
+                    "reason": null
+                },
+                "benefits": {
+                    "available": false,
+                    "reason": null
+                }
+            },
+            "restrictions": []
+        },
+        "insurance": null,
+        "deepLinks": [
+            {
+                "type": "Hotel",
+                "url": "https://www.voeazul.com.br/br/pt/home/hotel?ds=REC&stdi=27/11/2025&stdo=28/11/2025&r[0].adt=1&utm_source=click-site&s_afili=afiliados_az_azv_click-site_null_uf_minhas-viagens_hotel_interna_cpc_bnr_hp_dinamico#hotelList"
+            },
+            {
+                "type": "Ticket",
+                "url": "https://www.voeazul.com.br/br/pt/home/tickets?ds=REC&stdi=27/11/2025&bnr=<banner option>&adt=1&utm_source=click-site&s_afili=afiliados_az_azv_click-site_null_uf_minhas-viagens_tickets_interna_cpc_bnr_hp_dinamico#tickets"
+            },
+            {
+                "type": "Car",
+                "url": "https://www.voeazul.com.br/br/pt/home/cars?pkp.ds=REC&pkp.dt=27/11/2025&pkp.tm=18:30&dpo.ds=REC&dpo.dt=28/11/2025&dpo.tm=18:30&dvr.nt=BR&dvr.ag=48&utm_source=click-site&s_afili=afiliados_az_azv_click-site_null_uf_minhas-viagens_car_interna_cpc_bnr_hp_dinamico#car"
+            }
+        ],
+        "emailConfirmation": {
+            "available": true,
+            "reason": ""
+        },
+        "banners": [
+            null,
+            {
+                "flux": "hotel",
+                "channel": "site",
+                "destiny": null,
+                "dateRangeDiscount": {
+                    "initialDate": null,
+                    "endDate": null
+                },
+                "tags": "15%",
+                "redirectUrl": "https://www.voeazul.com.br/br/pt/home/hotel?ds=REC&stdi=27/11/2025&stdo=28/11/2025&r[0].adt=1&utm_source=click-site&s_afili=afiliados_az_azv_click-site_null_uf_minhas-viagens_hotel_interna_cpc_bnr_hp_dinamico#hotelList",
+                "imageUrl": "https://www.voeazul.com.br/content/dam/azul/voe-azul/about-accor-vacation-mobile.png",
+                "coupon": "CLIENTEAZUL",
+                "description": "<p>Sua viagem com conforto e desconto! <strong>Clientes que compram passagem aérea com a Azul ganham 15% Off no Hotel. Aproveite seu Cupom</strong></p>"
+            },
+            {
+                "flux": "cars",
+                "channel": "site",
+                "destiny": null,
+                "dateRangeDiscount": {
+                    "initialDate": null,
+                    "endDate": null
+                },
+                "tags": "15%",
+                "redirectUrl": "https://www.voeazul.com.br/br/pt/home/cars?pkp.ds=REC&pkp.dt=27/11/2025&pkp.tm=18:30&dpo.ds=REC&dpo.dt=28/11/2025&dpo.tm=18:30&dvr.nt=BR&dvr.ag=48&utm_source=click-site&s_afili=afiliados_az_azv_click-site_null_uf_minhas-viagens_car_interna_cpc_bnr_hp_dinamico#car",
+                "imageUrl": "https://www.voeazul.com.br/content/dam/azul/voe-azul/insurance/car-banner.png",
+                "coupon": "CLIENTEAZUL",
+                "description": "<p><strong>Novidade</strong>: Mais uma comodidade para sua viagem ser inesquecível! <strong>Aproveite seu Cupom</strong></p>"
+            }
+        ]
+    },
+    "notifications": []
+}

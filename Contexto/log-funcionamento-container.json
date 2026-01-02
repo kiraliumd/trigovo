@@ -1,0 +1,1034 @@
+[
+  {
+    "textPayload": "🛑 Recebido SIGTERM. Encerrando graciosamente...",
+    "insertId": "695566060009649f6e9ba44f",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "configuration_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3",
+        "revision_name": "scraper-voos-00021-ngf"
+      }
+    },
+    "timestamp": "2025-12-31T18:05:58.615583Z",
+    "labels": {
+      "instanceId": "0007e26d683ad3bdd0f2af07d62fc16c5a81e33ebff9fbe3d50be9dd047e9ef66dc9ccf0786207a3125a1522e33f9533882bf08d5072d7ab680191bb705e2553f9367b0a13584fe131df9d83ff803166729d69b447cb"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:05:58.622806040Z"
+  },
+  {
+    "textPayload": "🛑 Parando Worker...",
+    "insertId": "69556606000966900cb7c849",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "scraper-voos-00021-ngf",
+        "service_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos",
+        "location": "southamerica-east1"
+      }
+    },
+    "timestamp": "2025-12-31T18:05:58.616080Z",
+    "labels": {
+      "instanceId": "0007e26d683ad3bdd0f2af07d62fc16c5a81e33ebff9fbe3d50be9dd047e9ef66dc9ccf0786207a3125a1522e33f9533882bf08d5072d7ab680191bb705e2553f9367b0a13584fe131df9d83ff803166729d69b447cb"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:05:58.954883750Z"
+  },
+  {
+    "textPayload": "API HTTP fechada.",
+    "insertId": "6955660600096895c182e117",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "scraper-voos-00021-ngf",
+        "configuration_name": "scraper-voos",
+        "service_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3",
+        "location": "southamerica-east1"
+      }
+    },
+    "timestamp": "2025-12-31T18:05:58.616597Z",
+    "labels": {
+      "instanceId": "0007e26d683ad3bdd0f2af07d62fc16c5a81e33ebff9fbe3d50be9dd047e9ef66dc9ccf0786207a3125a1522e33f9533882bf08d5072d7ab680191bb705e2553f9367b0a13584fe131df9d83ff803166729d69b447cb"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:05:58.954883750Z"
+  },
+  {
+    "textPayload": "Worker encerrado.",
+    "insertId": "6955660600097870c3207b6a",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "location": "southamerica-east1",
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T18:05:58.620656Z",
+    "labels": {
+      "instanceId": "0007e26d683ad3bdd0f2af07d62fc16c5a81e33ebff9fbe3d50be9dd047e9ef66dc9ccf0786207a3125a1522e33f9533882bf08d5072d7ab680191bb705e2553f9367b0a13584fe131df9d83ff803166729d69b447cb"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:05:58.954883750Z"
+  },
+  {
+    "insertId": "69556caf0001ae5e48d84c15",
+    "httpRequest": {
+      "requestMethod": "POST",
+      "requestUrl": "https://scraper-voos-905122424233.southamerica-east1.run.app/scrape",
+      "requestSize": "690",
+      "status": 202,
+      "responseSize": "266",
+      "userAgent": "node",
+      "remoteIp": "54.237.231.151",
+      "serverIp": "34.143.79.2",
+      "latency": "2.726275501s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos",
+        "service_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "revision_name": "scraper-voos-00021-ngf"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:20.256463Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/angelic-coder-441602-n3/traces/dcb012b2d37dfdb6eb6af6aef4069f45",
+    "receiveTimestamp": "2025-12-31T18:34:23.116492013Z",
+    "spanId": "262f24c0721bcb77",
+    "traceSampled": true
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "69556cac0004436b1dc3e7f1",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "southamerica-east1",
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "service_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:20.279403Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae",
+      "scaling_reason": "AUTOSCALING"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2025-12-31T18:34:20.282284948Z"
+  },
+  {
+    "textPayload": "👷 Iniciando Worker (Lógica: Direto -> Fallback Proxy)...",
+    "insertId": "69556cae000dcd077c71bf29",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos",
+        "service_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "location": "southamerica-east1"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:22.904455Z",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:34:22.908976896Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"scraper-service-1\" on port 8080.",
+    "insertId": "69556cae000e30818c395586",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "scraper-voos",
+        "configuration_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3",
+        "revision_name": "scraper-voos-00021-ngf",
+        "location": "southamerica-east1"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:22.929921Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2025-12-31T18:34:22.947310519Z"
+  },
+  {
+    "textPayload": "🚀 API running on port 8080",
+    "insertId": "69556cae000eac2bcc22ec17",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "revision_name": "scraper-voos-00021-ngf",
+        "service_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:22.961579Z",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:34:23.241635066Z"
+  },
+  {
+    "textPayload": "[Job 9 | LATAM LA9576324HANE] 🚀 Iniciando processamento...",
+    "insertId": "69556caf0001c3f7d1be25f2",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "southamerica-east1",
+        "revision_name": "scraper-voos-00021-ngf",
+        "service_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:23.115703Z",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:34:23.241635066Z"
+  },
+  {
+    "textPayload": "[Job 9 | LATAM LA9576324HANE] 1️⃣ Tentando Conexão DIRETA (Sem Proxy)...",
+    "insertId": "69556caf0001c43d551e7d6c",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "project_id": "angelic-coder-441602-n3",
+        "revision_name": "scraper-voos-00021-ngf",
+        "configuration_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:23.115773Z",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:34:23.241635066Z"
+  },
+  {
+    "textPayload": "✈️ [LATAM] Iniciando: LA9576324HANE | Proxy: NÃO",
+    "insertId": "69556caf0001c60a2e8b2e6c",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "revision_name": "scraper-voos-00021-ngf",
+        "project_id": "angelic-coder-441602-n3",
+        "service_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:23.116234Z",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:34:23.241635066Z"
+  },
+  {
+    "textPayload": "⚡ Conectando via Direta (Sem Proxy)...",
+    "insertId": "69556caf0001c690c13276b6",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "scraper-voos-00021-ngf",
+        "project_id": "angelic-coder-441602-n3",
+        "service_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "configuration_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:23.116368Z",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:34:23.241635066Z"
+  },
+  {
+    "insertId": "69556cb2000bc3e8d2a8f165",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://scraper-voos-905122424233.southamerica-east1.run.app/scrape/9",
+      "requestSize": "514",
+      "status": 200,
+      "responseSize": "243",
+      "userAgent": "node",
+      "remoteIp": "54.237.231.151",
+      "serverIp": "34.143.79.2",
+      "latency": "0.007732920s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "southamerica-east1",
+        "revision_name": "scraper-voos-00021-ngf",
+        "configuration_name": "scraper-voos",
+        "service_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:26.761702Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/angelic-coder-441602-n3/traces/a4c04ef60ca1266cee11650e1cbd176c",
+    "receiveTimestamp": "2025-12-31T18:34:26.778177409Z",
+    "spanId": "9bb6c0766b6e4ff0"
+  },
+  {
+    "insertId": "69556cb6000615e55ea259f5",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://scraper-voos-905122424233.southamerica-east1.run.app/scrape/9",
+      "requestSize": "513",
+      "status": 200,
+      "responseSize": "243",
+      "userAgent": "node",
+      "remoteIp": "54.237.231.151",
+      "serverIp": "34.143.79.2",
+      "latency": "0.007919170s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "southamerica-east1",
+        "service_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:30.389325Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/angelic-coder-441602-n3/traces/cee1cc0d236b767323e5bd23c568d63d",
+    "receiveTimestamp": "2025-12-31T18:34:30.440211660Z",
+    "spanId": "b3d2e2a0399383b1",
+    "traceSampled": true
+  },
+  {
+    "textPayload": "📦 JSON LATAM recebido. Iniciando parse...",
+    "insertId": "69556cb800094d13f41f1e7e",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "scraper-voos-00021-ngf",
+        "configuration_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "service_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:32.609555Z",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:34:32.899080350Z"
+  },
+  {
+    "textPayload": "✅ Voo extraído com sucesso: LA3197",
+    "insertId": "69556cb800094e06f09962c0",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "scraper-voos-00021-ngf",
+        "configuration_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "project_id": "angelic-coder-441602-n3",
+        "service_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:32.609798Z",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:34:32.899080350Z"
+  },
+  {
+    "textPayload": "[Job 9 | LATAM LA9576324HANE] ✅ Sucesso na conexão direta!",
+    "insertId": "69556cb8000b29adf5eed553",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "revision_name": "scraper-voos-00021-ngf",
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:32.731565Z",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:34:32.899080350Z"
+  },
+  {
+    "insertId": "69556cba000462fec2cedc0d",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://scraper-voos-905122424233.southamerica-east1.run.app/scrape/9",
+      "requestSize": "513",
+      "status": 200,
+      "responseSize": "1161",
+      "userAgent": "node",
+      "remoteIp": "54.237.231.151",
+      "serverIp": "34.143.79.2",
+      "latency": "0.007784459s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos",
+        "location": "southamerica-east1"
+      }
+    },
+    "timestamp": "2025-12-31T18:34:34.277819Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/angelic-coder-441602-n3/traces/328444669f0b555523e5bd23c568db77",
+    "receiveTimestamp": "2025-12-31T18:34:34.437313453Z",
+    "spanId": "bd3b8e20132b9102"
+  },
+  {
+    "textPayload": "🛑 Recebido SIGTERM. Encerrando graciosamente...",
+    "insertId": "6955704200097d61381847e8",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "angelic-coder-441602-n3",
+        "revision_name": "scraper-voos-00021-ngf",
+        "configuration_name": "scraper-voos",
+        "service_name": "scraper-voos",
+        "location": "southamerica-east1"
+      }
+    },
+    "timestamp": "2025-12-31T18:49:38.621921Z",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:49:38.627065774Z"
+  },
+  {
+    "textPayload": "🛑 Parando Worker...",
+    "insertId": "6955704200097fa267bd2101",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "southamerica-east1",
+        "service_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "configuration_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3"
+      }
+    },
+    "timestamp": "2025-12-31T18:49:38.622498Z",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:49:38.960956360Z"
+  },
+  {
+    "textPayload": "API HTTP fechada.",
+    "insertId": "6955704200098208db48c6d6",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "angelic-coder-441602-n3",
+        "service_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "configuration_name": "scraper-voos",
+        "location": "southamerica-east1"
+      }
+    },
+    "timestamp": "2025-12-31T18:49:38.623112Z",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:49:38.960956360Z"
+  },
+  {
+    "textPayload": "Worker encerrado.",
+    "insertId": "6955704200098d260145b3d0",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos",
+        "service_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "revision_name": "scraper-voos-00021-ngf"
+      }
+    },
+    "timestamp": "2025-12-31T18:49:38.625958Z",
+    "labels": {
+      "instanceId": "0007e26d680794ab16347257b241e64e18c8ba95bc16dac0d65d9ab249a4376d6f76ba80b6b42cc6a7145e394362e61c7ff8c85aa331fbd01f6277bbd8988e1192e141c6323eb8bea3440f6ab6bf8c940c83aaf7c7ae"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T18:49:38.960956360Z"
+  },
+  {
+    "insertId": "695572ce0005c07d64a427d4",
+    "httpRequest": {
+      "requestMethod": "POST",
+      "requestUrl": "https://scraper-voos-905122424233.southamerica-east1.run.app/scrape",
+      "requestSize": "637",
+      "status": 202,
+      "responseSize": "267",
+      "userAgent": "node",
+      "remoteIp": "2804:14c:cceb:8099:958c:40af:5f35:3dc4",
+      "serverIp": "2600:1900:4241:200::",
+      "latency": "1.632964157s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "southamerica-east1",
+        "configuration_name": "scraper-voos",
+        "service_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "project_id": "angelic-coder-441602-n3"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:28.630610Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/angelic-coder-441602-n3/traces/43a1957571b030103668e1dba8f52e21",
+    "receiveTimestamp": "2025-12-31T19:00:30.381682599Z",
+    "spanId": "61859e744bcd02ee",
+    "traceSampled": true
+  },
+  {
+    "textPayload": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.",
+    "insertId": "695572cc0009cec5e2c54a10",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "southamerica-east1",
+        "configuration_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3",
+        "revision_name": "scraper-voos-00021-ngf",
+        "service_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:28.642757Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11",
+      "scaling_reason": "AUTOSCALING"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2025-12-31T19:00:28.649565124Z"
+  },
+  {
+    "textPayload": "👷 Iniciando Worker (Lógica: Direto -> Fallback Proxy)...",
+    "insertId": "695572ce000367380ccdf994",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos",
+        "service_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "revision_name": "scraper-voos-00021-ngf"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:30.223032Z",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T19:00:30.227818950Z"
+  },
+  {
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"scraper-service-1\" on port 8080.",
+    "insertId": "695572ce00038a462f32d3bb",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "service_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "project_id": "angelic-coder-441602-n3"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:30.232006Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2025-12-31T19:00:30.313583706Z"
+  },
+  {
+    "textPayload": "🚀 API running on port 8080",
+    "insertId": "695572ce00044a7823738026",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos",
+        "location": "southamerica-east1"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:30.281208Z",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T19:00:30.559615840Z"
+  },
+  {
+    "textPayload": "[Job 10 | LATAM LA9576324HANE] 🚀 Iniciando processamento...",
+    "insertId": "695572ce0005aa0b1e719e31",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos",
+        "location": "southamerica-east1"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:30.371211Z",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T19:00:30.559615840Z"
+  },
+  {
+    "textPayload": "[Job 10 | LATAM LA9576324HANE] 1️⃣ Tentando Conexão DIRETA (Sem Proxy)...",
+    "insertId": "695572ce0005aa3e4f8ce0f5",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "configuration_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "project_id": "angelic-coder-441602-n3"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:30.371262Z",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T19:00:30.559615840Z"
+  },
+  {
+    "textPayload": "✈️ [LATAM] Iniciando: LA9576324HANE | Proxy: NÃO",
+    "insertId": "695572ce0005abee325147f4",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos",
+        "service_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "revision_name": "scraper-voos-00021-ngf"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:30.371694Z",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T19:00:30.559615840Z"
+  },
+  {
+    "textPayload": "⚡ Conectando via Direta (Sem Proxy)...",
+    "insertId": "695572ce0005ac558484f7d2",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "scraper-voos-00021-ngf",
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "service_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:30.371797Z",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T19:00:30.559615840Z"
+  },
+  {
+    "insertId": "695572d1000afd0272ced5c0",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://scraper-voos-905122424233.southamerica-east1.run.app/scrape/10",
+      "requestSize": "462",
+      "status": 200,
+      "responseSize": "244",
+      "userAgent": "node",
+      "remoteIp": "2804:14c:cceb:8099:958c:40af:5f35:3dc4",
+      "serverIp": "2600:1900:4241:200::",
+      "latency": "0.020860149s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "scraper-voos",
+        "configuration_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "project_id": "angelic-coder-441602-n3",
+        "revision_name": "scraper-voos-00021-ngf"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:33.697528Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/angelic-coder-441602-n3/traces/2ae5c2fc984869f83668e1dba8f52166",
+    "receiveTimestamp": "2025-12-31T19:00:34.043724054Z",
+    "spanId": "4b245312c3bc3341"
+  },
+  {
+    "insertId": "695572d4000e8ec4eefa6342",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://scraper-voos-905122424233.southamerica-east1.run.app/scrape/10",
+      "requestSize": "462",
+      "status": 200,
+      "responseSize": "244",
+      "userAgent": "node",
+      "remoteIp": "2804:14c:cceb:8099:958c:40af:5f35:3dc4",
+      "serverIp": "2600:1900:4241:200::",
+      "latency": "0.010810970s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "southamerica-east1",
+        "service_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "configuration_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:36.940474Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/angelic-coder-441602-n3/traces/9e2413d383eb348e5c6a650fe08525d4",
+    "receiveTimestamp": "2025-12-31T19:00:37.042051859Z",
+    "spanId": "b4c0a3e8836737e8"
+  },
+  {
+    "textPayload": "📦 JSON LATAM recebido. Iniciando parse...",
+    "insertId": "695572d5000e80227644d72e",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "southamerica-east1",
+        "revision_name": "scraper-voos-00021-ngf",
+        "service_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:37.950306Z",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T19:00:38.220191160Z"
+  },
+  {
+    "textPayload": "✅ Voo extraído com sucesso: LA3197",
+    "insertId": "695572d5000e80f648580bb6",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "location": "southamerica-east1",
+        "service_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:37.950518Z",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T19:00:38.220191160Z"
+  },
+  {
+    "textPayload": "[Job 10 | LATAM LA9576324HANE] ✅ Sucesso na conexão direta!",
+    "insertId": "695572d60000e1c10482f81b",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "project_id": "angelic-coder-441602-n3",
+        "service_name": "scraper-voos",
+        "configuration_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "location": "southamerica-east1"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:38.057793Z",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T19:00:38.220191160Z"
+  },
+  {
+    "insertId": "695572d80003302bf2b3824b",
+    "httpRequest": {
+      "requestMethod": "GET",
+      "requestUrl": "https://scraper-voos-905122424233.southamerica-east1.run.app/scrape/10",
+      "requestSize": "462",
+      "status": 200,
+      "responseSize": "1162",
+      "userAgent": "node",
+      "remoteIp": "2804:14c:cceb:8099:958c:40af:5f35:3dc4",
+      "serverIp": "2600:1900:4241:200::",
+      "latency": "0.006612790s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "southamerica-east1",
+        "configuration_name": "scraper-voos",
+        "service_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "project_id": "angelic-coder-441602-n3"
+      }
+    },
+    "timestamp": "2025-12-31T19:00:40.200507Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/angelic-coder-441602-n3/traces/3aae03f5fa2c78865c6a650fe0852adf",
+    "receiveTimestamp": "2025-12-31T19:00:40.370068975Z",
+    "spanId": "821817631dddf4c4",
+    "traceSampled": true
+  },
+  {
+    "insertId": "6955738c00090c68a59cd3a1",
+    "httpRequest": {
+      "requestMethod": "POST",
+      "requestUrl": "https://scraper-voos-905122424233.southamerica-east1.run.app/scrape",
+      "requestSize": "637",
+      "status": 200,
+      "responseSize": "1166",
+      "userAgent": "node",
+      "remoteIp": "2804:14c:cceb:8099:958c:40af:5f35:3dc4",
+      "serverIp": "2600:1900:4241:200::",
+      "latency": "0.007349320s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "revision_name": "scraper-voos-00021-ngf",
+        "location": "southamerica-east1",
+        "project_id": "angelic-coder-441602-n3",
+        "configuration_name": "scraper-voos",
+        "service_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T19:03:40.578043Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/angelic-coder-441602-n3/traces/be0e0fe9c9acec9944aa5432a5e078e7",
+    "receiveTimestamp": "2025-12-31T19:03:40.597738414Z",
+    "spanId": "221cc577bc5f3b40",
+    "traceSampled": true
+  },
+  {
+    "insertId": "695573e70000dfdd24f3bfa3",
+    "httpRequest": {
+      "requestMethod": "POST",
+      "requestUrl": "https://scraper-voos-905122424233.southamerica-east1.run.app/scrape",
+      "requestSize": "636",
+      "status": 200,
+      "responseSize": "1166",
+      "userAgent": "node",
+      "remoteIp": "2804:14c:cceb:8099:958c:40af:5f35:3dc4",
+      "serverIp": "2600:1900:4241:200::",
+      "latency": "0.005326620s",
+      "protocol": "HTTP/1.1"
+    },
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "service_name": "scraper-voos",
+        "location": "southamerica-east1",
+        "configuration_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3",
+        "revision_name": "scraper-voos-00021-ngf"
+      }
+    },
+    "timestamp": "2025-12-31T19:05:11.045174Z",
+    "severity": "INFO",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Frequests",
+    "trace": "projects/angelic-coder-441602-n3/traces/60fd06a0928eeeaabf04b1248ce42bf2",
+    "receiveTimestamp": "2025-12-31T19:05:11.064534662Z",
+    "spanId": "0559937a622f7183",
+    "traceSampled": true
+  },
+  {
+    "textPayload": "🛑 Recebido SIGTERM. Encerrando graciosamente...",
+    "insertId": "6955777200098e9305406edb",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "service_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3",
+        "location": "southamerica-east1"
+      }
+    },
+    "timestamp": "2025-12-31T19:20:18.626323Z",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T19:20:18.630222666Z"
+  },
+  {
+    "textPayload": "🛑 Parando Worker...",
+    "insertId": "69557772000990b9808aaa05",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "southamerica-east1",
+        "project_id": "angelic-coder-441602-n3",
+        "revision_name": "scraper-voos-00021-ngf",
+        "configuration_name": "scraper-voos",
+        "service_name": "scraper-voos"
+      }
+    },
+    "timestamp": "2025-12-31T19:20:18.626873Z",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T19:20:18.966159883Z"
+  },
+  {
+    "textPayload": "API HTTP fechada.",
+    "insertId": "69557772000993134739e822",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "location": "southamerica-east1",
+        "service_name": "scraper-voos",
+        "configuration_name": "scraper-voos",
+        "project_id": "angelic-coder-441602-n3",
+        "revision_name": "scraper-voos-00021-ngf"
+      }
+    },
+    "timestamp": "2025-12-31T19:20:18.627475Z",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T19:20:18.966159883Z"
+  },
+  {
+    "textPayload": "Worker encerrado.",
+    "insertId": "695577720009a39c4514d02d",
+    "resource": {
+      "type": "cloud_run_revision",
+      "labels": {
+        "configuration_name": "scraper-voos",
+        "revision_name": "scraper-voos-00021-ngf",
+        "project_id": "angelic-coder-441602-n3",
+        "service_name": "scraper-voos",
+        "location": "southamerica-east1"
+      }
+    },
+    "timestamp": "2025-12-31T19:20:18.631708Z",
+    "labels": {
+      "instanceId": "0007e26d6884e9d4242435e88242723fea04933d84ffab568f509af7066019b56e382b99dd60acce7f8b4630d7645cc592f60b707c5555b21043e120e8e3ba9f92f3970d91bf5013e59771e9606a7eca0441c8227b11"
+    },
+    "logName": "projects/angelic-coder-441602-n3/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2025-12-31T19:20:18.966159883Z"
+  }
+]

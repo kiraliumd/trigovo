@@ -486,22 +486,103 @@ async function scrapeAzul({ pnr, origin, useProxy }) {
         const page = await context.newPage();
         await applyHumanHeaders(page);
         await warmup(page);
+
+        // Listener para capturar o JSON da reserva
         const apiPromise = page.waitForResponse(async res => {
+            const url = res.url();
             if (res.status() !== 200) return false;
-            try { const body = await res.json(); return body.data?.journeys || body.journeys; } catch (e) { return false; }
+            // A Azul costuma chamar endpoints que contém 'retrieve' ou 'Booking' para buscar dados da PNR
+            if (!url.includes('retrieve') && !url.includes('Booking')) return false;
+
+            try {
+                const body = await res.json();
+                return body.data?.journeys || body.journeys;
+            } catch (e) {
+                return false;
+            }
         }, { timeout: 60000 }).catch(() => null);
+
+        console.log('Navegando para AZUL...');
         await page.goto(`https://www.voeazul.com.br/br/pt/home/minhas-viagens?pnr=${pnr}&origin=${origin}`, { waitUntil: 'domcontentloaded' });
+
         const response = await apiPromise;
-        if (!response) throw new Error('API Azul não respondeu.');
+        if (!response) throw new Error('API Azul não respondeu com dados válidos.');
+
         const json = await response.json();
         const data = json.data || json;
+
+        if (!data.journeys || data.journeys.length === 0) {
+            throw new Error('PNR Azul sem jornadas encontradas.');
+        }
+
+        console.log('📦 JSON AZUL recebido. Iniciando parse...');
+
+        // 1. Extração de Passageiros
+        const passengers = (data.passengers || []).map(p => {
+            // Tenta encontrar o assento no primeiro segmento da primeira jornada
+            let seatDesignator = "Assento não marcado";
+            try {
+                const firstJourney = data.journeys[0];
+                const firstSegment = firstJourney.segments[0];
+                const ps = firstSegment.passengerSegment.find(ps => ps.passengerKey === p.passengerKey);
+                if (ps?.seat?.designator) {
+                    seatDesignator = ps.seat.designator;
+                }
+            } catch (e) { }
+
+            return {
+                name: `${p.name.first} ${p.name.last}`.toUpperCase(),
+                seat: seatDesignator,
+                baggage: {
+                    hasPersonalItem: true,
+                    hasCarryOn: true,
+                    hasChecked: p.bagCount > 0
+                }
+            };
+        });
+
+        // 2. Montagem de Detalhes da Viagem (Trips)
+        const trips = data.journeys.map((journey, index) => {
+            const segments = journey.segments.map(seg => ({
+                flightNumber: `${seg.identifier.carrierCode}${seg.identifier.flightNumber}`,
+                origin: seg.identifier.departureStation,
+                destination: seg.identifier.arrivalStation,
+                date: seg.identifier.std,
+                departureDate: seg.identifier.std,
+                arrivalDate: seg.identifier.sta,
+                airline: 'AZUL',
+                duration: "" // Azul JSON format for duration isn't obvious in segments
+            }));
+
+            return {
+                type: index === 0 ? 'IDA' : 'VOLTA',
+                segments: segments
+            };
+        });
+
+        const firstLeg = trips[0].segments[0];
+        const lastTrip = trips[trips.length - 1];
+        const lastLeg = lastTrip.segments[lastTrip.segments.length - 1];
+
         return {
-            flightNumber: `${data.journeys[0].segments[0].identifier.carrierCode}${data.journeys[0].segments[0].identifier.flightNumber}`,
-            departureDate: data.journeys[0].segments[0].identifier.std,
-            origin: data.journeys[0].segments[0].identifier.departureStation,
-            status: 'Confirmado', pnr, itinerary_details: { trips: [], passengers: [] }
+            flightNumber: firstLeg.flightNumber,
+            departureDate: firstLeg.departureDate,
+            origin: firstLeg.origin,
+            destination: lastLeg.destination,
+            status: 'Confirmado',
+            pnr: pnr,
+            method: useProxy ? 'Proxy' : 'Direct',
+            itinerary_details: {
+                trips: trips,
+                passengers: passengers
+            }
         };
-    } finally { if (browser) await browser.close().catch(() => { }); }
+    } catch (error) {
+        console.error(`❌ Erro AZUL: ${error.message}`);
+        throw error;
+    } finally {
+        if (browser) await browser.close().catch(() => { });
+    }
 }
 
 module.exports = { scrapeGol, scrapeLatam, scrapeAzul };

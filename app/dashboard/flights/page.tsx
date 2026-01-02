@@ -10,7 +10,12 @@ export default async function FlightsPage() {
 
     const { data: tickets } = await supabase
         .from('tickets')
-        .select('*')
+        .select(`
+            *,
+            ticket_flights(
+                flight:flights(*)
+            )
+        `)
         .eq('agency_id', user?.id)
         .order('flight_date', { ascending: true })
 

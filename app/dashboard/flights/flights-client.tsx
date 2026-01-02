@@ -49,8 +49,19 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
     }, [])
 
     const filteredTickets = initialTickets?.filter((ticket) => {
-        // Agora o ticket é consolidado por PNR
-        const flightDate = ticket.flight_date
+        // Obter os voos associados
+        const flights = ticket.ticket_flights?.map((tf: any) => tf.flight) || []
+
+        // Se não houver voos salvos ainda, usamos os dados do ticket como fallback
+        // Mas a ideia é que o primeiro voo dite a regra
+        const sortedFlights = [...flights].sort((a, b) =>
+            new Date(a.departure_date).getTime() - new Date(b.departure_date).getTime()
+        )
+        const firstFlight = sortedFlights[0]
+
+        const flightDate = firstFlight?.departure_date || ticket.flight_date
+        const ticketStatus = firstFlight?.status || ticket.status
+
         const checkinStatus = calculateCheckinStatus(
             ticket.airline as any,
             new Date(flightDate)
@@ -68,11 +79,11 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
         // Tab Filter
         let matchesTab = true
         if (statusTab === "checkin-aberto") {
-            matchesTab = checkinStatus.isCheckinOpen && status !== "Completo"
+            matchesTab = checkinStatus.isCheckinOpen && ticketStatus !== "Completo"
         } else if (statusTab === "checkin-fechado") {
-            matchesTab = !checkinStatus.isCheckinOpen && status !== "Completo"
+            matchesTab = !checkinStatus.isCheckinOpen && ticketStatus !== "Completo"
         } else if (statusTab === "voados") {
-            matchesTab = status === "Completo" || new Date(flightDate) < new Date()
+            matchesTab = ticketStatus === "Completo" || new Date(flightDate) < new Date()
         }
 
         return matchesSearch && matchesAirline && matchesTab
@@ -212,10 +223,19 @@ export function FlightsClient({ initialTickets }: FlightsClientProps) {
                                     </TableRow>
                                 ) : (
                                     filteredTickets?.map((ticket) => {
-                                        const flightDate = ticket.flight_date
-                                        const origin = ticket.origin
-                                        const destination = ticket.destination
-                                        const status = ticket.status
+                                        const flights = ticket.ticket_flights?.map((tf: any) => tf.flight) || []
+                                        const sortedFlights = [...flights].sort((a, b) =>
+                                            new Date(a.departure_date).getTime() - new Date(b.departure_date).getTime()
+                                        )
+                                        const firstFlight = sortedFlights[0]
+                                        const lastFlight = sortedFlights[sortedFlights.length - 1]
+
+                                        const flightDate = firstFlight?.departure_date || ticket.flight_date
+                                        const status = firstFlight?.status || ticket.status
+
+                                        // Origem e Destino final da reserva (Mantendo a regra de exibir apenas o início e o fim)
+                                        const origin = firstFlight?.origin || ticket.origin
+                                        const destination = lastFlight?.destination || ticket.destination
 
                                         const checkinStatus = calculateCheckinStatus(
                                             ticket.airline as any,

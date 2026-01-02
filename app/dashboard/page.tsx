@@ -19,55 +19,79 @@ export default async function DashboardPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Buscar dados
+    // Buscar dados consolidados
+    // Buscamos os tickets (reservas) e seus voos associados via ticket_flights
     const { data: tickets } = await supabase
         .from('tickets')
-        .select('*, flights:flights!tickets_flight_id_fkey(*)')
+        .select(`
+            *,
+            ticket_flights!inner(
+                flight:flights(*)
+            )
+        `)
         .eq('agency_id', user?.id)
         .neq('status', 'Cancelado')
         .neq('status', 'Completo')
 
-    // Calcular Métricas
+    // Calcular Métricas (Nível de Reserva/PNR)
     const activeFlights = tickets?.length || 0
 
     const checkinOpenCount = tickets?.filter(t => {
-        // Fallback para flight_date se não tiver relação com flights (embora deva ter)
-        const flightDate = t.flights?.departure_date || t.flight_date
-        if (!flightDate) return false
+        // Uma reserva tem o check-in aberto se o SEU PRIMEIRO VOO estiver com check-in aberto
+        const flights = t.ticket_flights?.map((tf: any) => tf.flight) || []
+        if (flights.length === 0) return false
 
-        const { isCheckinOpen } = calculateCheckinStatus(t.airline as Airline, new Date(flightDate))
+        // Ordenar por data de partida para pegar o primeiro
+        const sortedFlights = [...flights].sort((a, b) =>
+            new Date(a.departure_date).getTime() - new Date(b.departure_date).getTime()
+        )
+        const firstFlight = sortedFlights[0]
+
+        const { isCheckinOpen } = calculateCheckinStatus(t.airline as Airline, new Date(firstFlight.departure_date))
         return isCheckinOpen
     }).length || 0
 
     const next24hCount = tickets?.filter(t => {
-        const flightDateStr = t.flights?.departure_date || t.flight_date
-        if (!flightDateStr) return false
+        const flights = t.ticket_flights?.map((tf: any) => tf.flight) || []
+        if (flights.length === 0) return false
 
-        const flightDate = new Date(flightDateStr)
+        // Se qualquer voo da reserva for nas próximas 24h
         const now = new Date()
         const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
 
-        return flightDate >= now && flightDate <= tomorrow
+        return flights.some((f: any) => {
+            const flightDate = new Date(f.departure_date)
+            return flightDate >= now && flightDate <= tomorrow
+        })
     }).length || 0
 
-    // Legal Intelligence Logic
-    const legalOpportunities = tickets?.filter(t => {
-        const flightDateStr = t.flights?.departure_date || t.flight_date
-        if (!flightDateStr) return false
+    // Legal Intelligence Logic (Nível de VOO)
+    // Aqui listamos os voos individuais que dão direito a indenização
+    const legalOpportunities: any[] = []
 
-        const flightDate = new Date(flightDateStr)
+    tickets?.forEach(t => {
+        const flights = t.ticket_flights?.map((tf: any) => tf.flight) || []
         const now = new Date()
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
-        // Filter last 30 days
-        if (flightDate < thirtyDaysAgo || flightDate > now) return false
+        flights.forEach((f: any) => {
+            const flightDate = new Date(f.departure_date)
 
-        const status = t.flights?.status || t.status
-        const delay = t.flights?.delay_minutes || 0
+            // Filtro últimos 30 dias
+            if (flightDate < thirtyDaysAgo || flightDate > now) return
 
-        // Cancelled OR Delayed > 4 hours (240 mins)
-        return status === 'Cancelado' || (status === 'Atrasado' && delay >= 240)
-    }) || []
+            const status = f.status
+            const delay = f.delay_minutes || 0
+
+            // Cancelado OU Atrasado > 4 horas (240 mins)
+            if (status === 'Cancelado' || (status === 'Atrasado' && delay >= 240)) {
+                legalOpportunities.push({
+                    ...t,
+                    target_flight: f // Referência ao voo problemático
+                })
+            }
+        })
+    })
 
     const legalCount = legalOpportunities.length
     const potentialValue = legalCount * 5000
@@ -197,13 +221,13 @@ export default async function DashboardPage() {
                             .sort((a, b) => new Date(b.flight_date || b.flights?.departure_date || 0).getTime() - new Date(a.flight_date || a.flights?.departure_date || 0).getTime())
                             .slice(0, 5)
                             .map((ticket, index, array) => {
-                                const isCancelled = ticket.status === 'Cancelado' || ticket.flights?.status === 'Cancelado'
-                                const delay = ticket.flights?.delay_minutes || 0
-                                const flightDate = ticket.flights?.departure_date || ticket.flight_date
+                                const isCancelled = ticket.target_flight.status === 'Cancelado'
+                                const delay = ticket.target_flight.delay_minutes || 0
+                                const flightDate = ticket.target_flight.departure_date
                                 const dateStr = flightDate
                                     ? format(new Date(flightDate), "d 'DE' MMM", { locale: ptBR }).toUpperCase()
                                     : ''
-                                const origin = ticket.origin || ''
+                                const origin = ticket.target_flight.origin || ticket.origin || ''
                                 const isFirst = index === 0
                                 const isLast = index === array.length - 1
 
