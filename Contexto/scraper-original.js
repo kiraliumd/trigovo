@@ -2,7 +2,6 @@ const { chromium: chromiumExtra } = require('playwright-extra');
 const stealth = require('puppeteer-extra-plugin-stealth');
 const fs = require('fs');
 const path = require('path');
-const supabase = require('./supabaseClient');
 
 // Ativa plugin stealth
 chromiumExtra.use(stealth());
@@ -11,10 +10,9 @@ chromiumExtra.use(stealth());
 const SESSION_FILE = path.join(__dirname, 'session_gol.json');
 
 // --- CONFIGURAÇÃO DE PROXY ---
-const PROXY_SERVER = process.env.PROXY_SERVER;
-const PROXY_USERNAME = process.env.PROXY_USERNAME;
-const PROXY_PASSWORD = process.env.PROXY_PASSWORD;
-const TOTAL_PROXIES = parseInt(process.env.TOTAL_PROXIES || '250');
+const PROXY_SERVER = 'http://p.webshare.io:80';
+const PROXY_PASSWORD = '5so72ui3knmj';
+const TOTAL_PROXIES = 250;
 
 // Perfis para parecer mais humano
 const USER_AGENTS = [
@@ -37,13 +35,10 @@ async function humanPause(baseMs = 400) {
 }
 
 function getRandomProxy() {
-    if (!PROXY_SERVER || !PROXY_USERNAME || !PROXY_PASSWORD) return undefined;
     const randomIndex = randomInt(1, TOTAL_PROXIES);
-    // Se o usuário já passou o sufixo -BR- no .env, mantemos. Caso contrário, o original sugere um formato específico.
-    // O usuário confirmou: PROXY_USERNAME="xtweuspr-BR-"
     return {
         server: PROXY_SERVER,
-        username: `${PROXY_USERNAME}${randomIndex}`,
+        username: `xtweuspr-BR-${randomIndex}`,
         password: PROXY_PASSWORD
     };
 }
@@ -127,17 +122,13 @@ async function launchBrowser(useProxy) {
 
     if (useProxy) {
         proxyConfig = getRandomProxy();
-        if (proxyConfig) {
-            console.log(`🔌 Conectando via Proxy (${proxyConfig.username})...`);
-        } else {
-            console.warn(`⚠️ Proxy solicitado mas não configurado. Continuando SEM proxy.`);
-        }
+        console.log(`🔌 Conectando via Proxy (${proxyConfig.username})...`);
     } else {
         console.log(`⚡ Conectando via Direta (Sem Proxy)...`);
     }
 
     return await chromiumExtra.launch({
-        headless: process.env.HEADLESS !== 'false' && process.env.PLAYWRIGHT_HEADLESS !== 'false',
+        headless: process.env.PLAYWRIGHT_HEADLESS !== 'false',
         proxy: proxyConfig,
         slowMo: randomInt(35, 95),
         args: [
@@ -154,7 +145,7 @@ async function launchBrowser(useProxy) {
 // ============================================================================
 // 1. GOL (Mantido o código funcional com TAB)
 // ============================================================================
-async function scrapeGol({ pnr, lastname, origin, useProxy, agencyId }) {
+async function scrapeGol({ pnr, lastname, origin, useProxy }) {
     if (typeof pnr !== 'string' || typeof lastname !== 'string') throw new Error('Dados inválidos.');
 
     let browser = null;
@@ -164,30 +155,9 @@ async function scrapeGol({ pnr, lastname, origin, useProxy, agencyId }) {
 
         let contextOptions = buildContextOptions({ ignoreHTTPSErrors: true });
 
-        // Tenta carregar sessão do Supabase (por Agência)
-        if (agencyId && supabase) {
-            console.log(`📥 Carregando sessão GOL do banco para a agência: ${agencyId}`);
-            try {
-                const { data: agency } = await supabase
-                    .from('agencies')
-                    .select('gol_session')
-                    .eq('id', agencyId)
-                    .single();
-
-                if (agency?.gol_session) {
-                    contextOptions.storageState = agency.gol_session;
-                    console.log('✅ Sessão carregada do banco.');
-                }
-            } catch (e) {
-                console.warn('⚠️ Falha ao ler sessão do banco:', e.message);
-            }
-        }
-
-        // FALLBACK: Se não logou pelo banco, tenta o arquivo local (como no original)
-        if (!contextOptions.storageState && fs.existsSync(SESSION_FILE)) {
+        if (fs.existsSync(SESSION_FILE)) {
             try {
                 contextOptions.storageState = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf8'));
-                console.log('✅ Sessão carregada do arquivo local (Fallback).');
             } catch (e) { }
         }
 
@@ -262,23 +232,10 @@ async function scrapeGol({ pnr, lastname, origin, useProxy, agencyId }) {
             } catch (e) { }
         }
 
-        // Salva a sessão no Supabase e LOCAL (original) após o processamento
         try {
             const storage = await context.storageState();
             fs.writeFileSync(SESSION_FILE, JSON.stringify(storage));
-
-            if (agencyId && supabase) {
-                const { error } = await supabase
-                    .from('agencies')
-                    .update({ gol_session: storage })
-                    .eq('id', agencyId);
-
-                if (error) throw error;
-                console.log(`📤 Sessão GOL salva no banco e localmente.`);
-            }
-        } catch (e) {
-            console.warn('⚠️ Falha ao salvar sessão:', e.message);
-        }
+        } catch (e) { }
 
         const apiResponse = await apiPromise;
         if (apiResponse) {
@@ -312,61 +269,21 @@ async function scrapeGol({ pnr, lastname, origin, useProxy, agencyId }) {
 }
 
 function parseGolJson(pnrData, pnr, origin, useProxy) {
-    if (!pnrData || !pnrData.itinerary || !pnrData.itinerary.itineraryParts) {
-        throw new Error('PNR data structure is invalid');
-    }
-
-    const trips = pnrData.itinerary.itineraryParts.map((part, index) => {
-        const segments = part.segments.map(seg => ({
-            flightNumber: `${seg.flight.airlineCode}${seg.flight.flightNumber}`,
-            origin: seg.origin,
-            destination: seg.destination,
-            date: seg.departure,
-            departureDate: seg.departure,
-            arrivalDate: seg.arrival,
-            duration: `${Math.floor(seg.duration / 60)}h ${seg.duration % 60}m`,
-            airline: 'GOL',
-            status: seg.segmentStatusCode?.segmentStatus || 'CONFIRMED'
-        }));
-        return {
-            type: index === 0 ? 'IDA' : 'VOLTA',
-            segments: segments
-        };
-    });
-
-    const firstLeg = trips[0].segments[0];
-    const lastTrip = trips[trips.length - 1];
-    const lastLeg = lastTrip.segments[lastTrip.segments.length - 1];
-
-    const passengers = pnrData.passengers.map(p => {
-        // Tenta encontrar o assento no primeiro segmento
-        let seat = "Assento não marcado";
-        // GOL JSON structure for seats is usually in segments or SSRs, 
-        // but often not present in the main PNR object until check-in.
-
-        return {
-            name: `${p.passengerDetails.firstName} ${p.passengerDetails.lastName}`.toUpperCase(),
-            seat: seat,
-            baggage: {
-                hasPersonalItem: true,
-                hasCarryOn: true,
-                hasChecked: false // GOL doesn't always show this clearly in this JSON
-            }
-        };
-    });
-
+    const segment = pnrData.itinerary.itineraryParts[0].segments[0];
+    const passengers = pnrData.passengers.map(p => ({
+        name: `${p.passengerDetails.firstName} ${p.passengerDetails.lastName}`.toUpperCase(),
+        seat: "Check-in não feito",
+        baggage: { hasChecked: false }
+    }));
     return {
-        flightNumber: firstLeg.flightNumber,
-        departureDate: firstLeg.departureDate,
-        origin: firstLeg.origin,
-        destination: lastLeg.destination,
-        status: firstLeg.status === 'CONFIRMED' ? 'Confirmado' : 'Outro',
-        pnr: pnr,
+        flightNumber: `${segment.flight.airlineCode}${segment.flight.flightNumber}`,
+        departureDate: segment.departure,
+        origin: segment.origin,
+        destination: segment.destination,
+        status: 'Confirmado',
+        pnr,
         method: useProxy ? 'Proxy' : 'Direct',
-        itinerary_details: {
-            trips: trips,
-            passengers: passengers
-        }
+        itinerary_details: { trips: [], passengers }
     };
 }
 
@@ -453,7 +370,6 @@ async function scrapeLatam({ pnr, lastname, useProxy }) {
                 date: seg.departure?.dateTime?.isoValue, // Normalize to 'date' for frontend
                 departureDate: seg.departure?.dateTime?.isoValue, // Keep for backward compat
                 arrivalDate: seg.arrival?.dateTime?.isoValue,
-                airline: 'LATAM',
                 duration: seg.duration || part.totalDuration
             }));
             return {
@@ -498,103 +414,22 @@ async function scrapeAzul({ pnr, origin, useProxy }) {
         const page = await context.newPage();
         await applyHumanHeaders(page);
         await warmup(page);
-
-        // Listener para capturar o JSON da reserva
         const apiPromise = page.waitForResponse(async res => {
-            const url = res.url();
             if (res.status() !== 200) return false;
-            // A Azul costuma chamar endpoints que contém 'retrieve' ou 'Booking' para buscar dados da PNR
-            if (!url.includes('retrieve') && !url.includes('Booking')) return false;
-
-            try {
-                const body = await res.json();
-                return body.data?.journeys || body.journeys;
-            } catch (e) {
-                return false;
-            }
+            try { const body = await res.json(); return body.data?.journeys || body.journeys; } catch (e) { return false; }
         }, { timeout: 60000 }).catch(() => null);
-
-        console.log('Navegando para AZUL...');
         await page.goto(`https://www.voeazul.com.br/br/pt/home/minhas-viagens?pnr=${pnr}&origin=${origin}`, { waitUntil: 'domcontentloaded' });
-
         const response = await apiPromise;
-        if (!response) throw new Error('API Azul não respondeu com dados válidos.');
-
+        if (!response) throw new Error('API Azul não respondeu.');
         const json = await response.json();
         const data = json.data || json;
-
-        if (!data.journeys || data.journeys.length === 0) {
-            throw new Error('PNR Azul sem jornadas encontradas.');
-        }
-
-        console.log('📦 JSON AZUL recebido. Iniciando parse...');
-
-        // 1. Extração de Passageiros
-        const passengers = (data.passengers || []).map(p => {
-            // Tenta encontrar o assento no primeiro segmento da primeira jornada
-            let seatDesignator = "Assento não marcado";
-            try {
-                const firstJourney = data.journeys[0];
-                const firstSegment = firstJourney.segments[0];
-                const ps = firstSegment.passengerSegment.find(ps => ps.passengerKey === p.passengerKey);
-                if (ps?.seat?.designator) {
-                    seatDesignator = ps.seat.designator;
-                }
-            } catch (e) { }
-
-            return {
-                name: `${p.name.first} ${p.name.last}`.toUpperCase(),
-                seat: seatDesignator,
-                baggage: {
-                    hasPersonalItem: true,
-                    hasCarryOn: true,
-                    hasChecked: p.bagCount > 0
-                }
-            };
-        });
-
-        // 2. Montagem de Detalhes da Viagem (Trips)
-        const trips = data.journeys.map((journey, index) => {
-            const segments = journey.segments.map(seg => ({
-                flightNumber: `${seg.identifier.carrierCode}${seg.identifier.flightNumber}`,
-                origin: seg.identifier.departureStation,
-                destination: seg.identifier.arrivalStation,
-                date: seg.identifier.std,
-                departureDate: seg.identifier.std,
-                arrivalDate: seg.identifier.sta,
-                airline: 'AZUL',
-                duration: "" // Azul JSON format for duration isn't obvious in segments
-            }));
-
-            return {
-                type: index === 0 ? 'IDA' : 'VOLTA',
-                segments: segments
-            };
-        });
-
-        const firstLeg = trips[0].segments[0];
-        const lastTrip = trips[trips.length - 1];
-        const lastLeg = lastTrip.segments[lastTrip.segments.length - 1];
-
         return {
-            flightNumber: firstLeg.flightNumber,
-            departureDate: firstLeg.departureDate,
-            origin: firstLeg.origin,
-            destination: lastLeg.destination,
-            status: 'Confirmado',
-            pnr: pnr,
-            method: useProxy ? 'Proxy' : 'Direct',
-            itinerary_details: {
-                trips: trips,
-                passengers: passengers
-            }
+            flightNumber: `${data.journeys[0].segments[0].identifier.carrierCode}${data.journeys[0].segments[0].identifier.flightNumber}`,
+            departureDate: data.journeys[0].segments[0].identifier.std,
+            origin: data.journeys[0].segments[0].identifier.departureStation,
+            status: 'Confirmado', pnr, itinerary_details: { trips: [], passengers: [] }
         };
-    } catch (error) {
-        console.error(`❌ Erro AZUL: ${error.message}`);
-        throw error;
-    } finally {
-        if (browser) await browser.close().catch(() => { });
-    }
+    } finally { if (browser) await browser.close().catch(() => { }); }
 }
 
 module.exports = { scrapeGol, scrapeLatam, scrapeAzul };
